@@ -40,7 +40,7 @@ sed "s/\(site\s*=\s*\)'\w+'/\1'T2_CH_CSCS'/" submit_crab.py
 
 
 ### DeepTauID
-In case you want to use `DeepTau2017v2p1` in `102X` samples,
+In case you want to use `DeepTau2017v2p1` in `102X` samples, see this [this TWiki page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Running_of_the_DeepTauIDs_ver_20), and setup `CMSSW` as
 ```
 CMSSW=CMSSW_10_2_16_patch1
 export SCRAM_ARCH=slc6_amd64_gcc700
@@ -54,7 +54,6 @@ sed 's/rawDeepTau2017v2/rawDeepTau2017v2p1/g' PhysicsTools/NanoAOD/python/taus_c
 scram b -j 4
 cd ../..
 ```
-See this [this TWiki page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Running_of_the_DeepTauIDs_ver_20)
 
 
 ### Environment setup
@@ -88,6 +87,18 @@ cmsRun pset_miniAOD_rerun.py
 Process `miniAOD` to `nanoAODv5` with
 ```
 cmsRun pset_nanoAODv5.py
+```
+
+
+## Check `miniAOD`
+
+Check the content of a `miniAOD` file with
+```
+edmProvDump input/VLQ-p_M1100_2017_rerun.root > dump.log
+```
+or use as an example (see [this TWiki page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2016#Example_code_accessing_all_high))
+```
+./checkMiniAOD.py
 ```
 
 
