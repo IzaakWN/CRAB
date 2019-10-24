@@ -20,13 +20,17 @@ cmsenv
 scram b -j4
 cd ../..
 ```
-When you want to use CRAB with `SLC6`, you need to do:
+When you want to use CRAB, you need to source the relevant setup script:
 ```
-source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
+source $VO_CMS_SW_DIR/crab3/crab_slc6.sh  # for SLC6
+source $VO_CMS_SW_DIR/crab3/crab.sh       # for SLC7
 ```
-or if you are using `SLC7`,
+
+Make sure you have a valid VOMS proxy, e.g.
 ```
-source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
+voms-proxy-info --timeleft              # check how many seconds you have left
+voms-proxy-init -voms cms -valid 400:0  # renew proxy if it is too short
+source setupVOMS.sh                     # OR, source this script instead of the above two lines
 ```
 
 Before submitting jobs to CRAB, make sure that in [`submit_crab.py`](submit_crab.py) you have specified the correct tier storage element that you have writing permissions to. For example with `'T2_CH_CSCS'` for PSI's T2:
@@ -57,22 +61,14 @@ See this [this TWiki page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuid
 
 With each new shell session, do something like
 ```
+cd CRAB
+source setupVOMS.sh
 source $VO_CMS_SW_DIR/cmsset_default.sh
 source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
 export SCRAM_ARCH=slc6_amd64_gcc700
 cd CMSSW_10_2_16_patch1/src
 cmsenv
 cd ../..
-```
-
-Make sure you have a valid VOMS proxy, e.g.
-```
-voms-proxy-info --timeleft              # check how many seconds you have left
-voms-proxy-init -voms cms -valid 400:0  # renew proxy if it is too short
-```
-of use
-```
-source setupVOMS.sh
 ```
 
 
