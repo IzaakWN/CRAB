@@ -29,6 +29,11 @@ or if you are using `SLC7`,
 source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
 ```
 
+Before submitting jobs to CRAB, make sure that in [`submit_crab.py`](submit_crab.py) you have specified the correct tier storage element that you have writing permissions to. For example with `'T2_CH_CSCS'` for PSI's T2:
+```
+sed "s/\(site\s*=\s*\)'\w+'/\1'T2_CH_CSCS'/" submit_crab.py
+``` 
+
 
 ### DeepTauID
 In case you want to use `DeepTau2017v2p1` in `102X` samples,
@@ -60,8 +65,24 @@ cmsenv
 cd ../..
 ```
 
+Make sure you have a valid VOMS proxy, e.g.
+```
+voms-proxy-info --timeleft              # check how many seconds you have left
+voms-proxy-init -voms cms -valid 400:0  # renew proxy if it is too short
+```
+of use
+```
+source setupVOMS.sh
+```
+
 
 ## Local run
+
+Get some files with e.g.
+```
+dasgoclient --limit=0 --query="dataset=/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM file" | head -n1
+xrdcp -f root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/100000/042C8EE9-9431-5443-88C8-77F1D910B3A5.root ./test.root
+```
 
 Reprocess `miniAOD` to add `DeepTau2017v2p1` with
 ```
@@ -99,8 +120,25 @@ To run test job(s), do e.g.
 ./submit_crab.py -y 2017 -t 2  # two test jobs
 ```
 
+Check the task status with (replacing `<request>`)
+```
+crab status -d crab_projects/<request>
+```
+
+If you publish your output files (default, if it is not a test job), you can retrieve them in DAS with (replacing `<user>`)
+```
+dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
+```
+
 
 ## Notes
+
+### CRAB3
+
+* Tutorial: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial
+* Configuration: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+* Commands: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Commands
+
 
 ### NanoAOD
 
