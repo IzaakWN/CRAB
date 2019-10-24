@@ -116,6 +116,11 @@ Then you can submit with
 ./submit_crab.py -y 2017
 ```
 
+To submit a specific parameter-set configuration file, do e.g.
+```
+./submit_crab.py -y 2017 -s pset_nanoAODv5.py
+```
+
 To filter a specific sample, do e.g.
 ```
 ./submit_crab.py -y 2017 -s DY*Jets

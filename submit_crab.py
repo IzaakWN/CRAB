@@ -240,7 +240,7 @@ if __name__ == '__main__':
   parser.add_argument('-s', '--sample',  dest='samples', type=str, nargs='+', default=[ ], action='store',
                       metavar="DATASET", help="samples to submit" )
   parser.add_argument('-p', '--pset',    dest='psets', type=str, nargs='+', default=[ ], action='store',
-                      metavar="SCRIPT",  help="PSet scripts to submit" )
+                      metavar="SCRIPT",  help="parameter-set configuration file to submit" )
   parser.add_argument('-t', '--test',    dest='test', type=int, nargs='?', default=-1, const=1,
                       metavar="NJOBS",   help="submit test job(s)" )
   args = parser.parse_args()
