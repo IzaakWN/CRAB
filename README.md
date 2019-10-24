@@ -45,6 +45,7 @@ sed 's/rawDeepTau2017v2/rawDeepTau2017v2p1/g' PhysicsTools/NanoAOD/python/taus_c
 scram b -j 4
 cd ../..
 ```
+See this [this TWiki page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Running_of_the_DeepTauIDs_ver_20)
 
 
 ### Environment setup
@@ -90,6 +91,12 @@ Then you can submit with
 To filter a specific sample, do e.g.
 ```
 ./submit_crab.py -y 2017 -s DY*Jets
+```
+
+To run test job(s), do e.g.
+```
+./submit_crab.py -y 2017 -t    # one test job
+./submit_crab.py -y 2017 -t 2  # two test jobs
 ```
 
 
