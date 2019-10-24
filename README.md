@@ -26,7 +26,7 @@ source $VO_CMS_SW_DIR/crab3/crab_slc6.sh  # for SLC6
 source $VO_CMS_SW_DIR/crab3/crab.sh       # for SLC7
 ```
 
-Make sure you have a valid VOMS proxy, e.g.
+Make sure you have a valid VOMS proxy,
 ```
 voms-proxy-info --timeleft              # check how many seconds you have left
 voms-proxy-init -voms cms -valid 400:0  # renew proxy if it is too short
@@ -90,7 +90,7 @@ cmsRun pset_nanoAODv5.py
 ```
 
 
-## Check `miniAOD`
+## Check output
 
 Check the content of a `miniAOD` file with
 ```
