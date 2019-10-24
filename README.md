@@ -1,5 +1,7 @@
 # CRAB
+
 Process `miniAOD` or `nanoAOD` files with `CRAB3`.
+
 
 ## Installation
 
@@ -16,38 +18,78 @@ cmsrel $CMSSW
 cd $CMSSW/src
 cmsenv
 scram b -j4
+cd ../..
 ```
-When you want to use CRAB, you need to do:
+When you want to use CRAB with `SLC6`, you need to do:
+```
+source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
+```
+or if you are using `SLC7`,
 ```
 source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
 ```
 
+
+### DeepTauID
 In case you want to use `DeepTau2017v2p1` in `102X` samples,
 ```
-
-```
-
-And if you want to use [recoil corrections of the MET](https://github.com/CMS-HTT/RecoilCorrections/blob/master/instructions.txt) for W/Z/Higgs samples:
-```
-cd $CMSSW_BASE/src
-git clone https://github.com/CMS-HTT/RecoilCorrections.git HTT-utilities/RecoilCorrections 
-scram b
-```
-
-Each time you want to run the code in a new shell session, do
-```
-cd CMSSW_10_3_3/src
+CMSSW=CMSSW_10_2_16_patch1
+export SCRAM_ARCH=slc6_amd64_gcc700
+cmsrel $CMSSW
+cd $CMSSW/src/
 cmsenv
-source setupEnv.sh
+git cms-merge-topic -u cms-tau-pog:CMSSW_10_2_X_tau-pog_DeepTau2017v2
+git cms-merge-topic -u cms-tau-pog:CMSSW_10_2_X_tau-pog_deepTauVetoPCA
+sed 's/idDeepTau2017v2/idDeepTau2017v2p1/g' PhysicsTools/NanoAOD/python/taus_cff.py -i
+sed 's/rawDeepTau2017v2/rawDeepTau2017v2p1/g' PhysicsTools/NanoAOD/python/taus_cff.py -i
+scram b -j 4
+cd ../..
 ```
+
+
+### Environment setup
+
+With each new shell session, do something like
+```
+source $VO_CMS_SW_DIR/cmsset_default.sh
+source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
+export SCRAM_ARCH=slc6_amd64_gcc700
+cd CMSSW_10_2_16_patch1/src
+cmsenv
+cd ../..
+```
+
+
+## Local run
+
+Reprocess `miniAOD` to add `DeepTau2017v2p1` with
+```
+cmsRun pset_miniAOD_rerun.py
+```
+
+Process `miniAOD` to `nanoAODv5` with
+```
+cmsRun pset_nanoAODv5.py
+```
+
 
 
 ## Submit
 
-### Locally
-For a **local run**, do something like
+Collect your favorite samples in the respective python file, sorted in a dictionary per year:
 ```
-./postprocessors/local.py -c mutau -y 2017
+samples_miniAOD.py
+samples_nanoAOD.py
+```
+
+Then you can submit with
+```
+./submit_crab.py -y 2017
+```
+
+To filter a specific sample, do e.g.
+```
+./submit_crab.py -y 2017 -s DY*Jets
 ```
 
 
