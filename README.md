@@ -10,7 +10,7 @@ First, get this repository:
 git clone https://github.com/IzaakWN/CRAB CRAB
 cd CRAB
 ```
-then get the relevant `CMSSW`, e.g.:
+then install the relevant `CMSSW` in this directory, e.g.:
 ```
 CMSSW=CMSSW_10_2_16_patch1
 export SCRAM_ARCH=slc6_amd64_gcc700
