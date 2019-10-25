@@ -52,7 +52,7 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   test          = kwargs.get('test',       0)
   force         = kwargs.get('force',      False)
   pluginName    = 'Analysis' #'PrivateMC'
-  splitting     = 'Automatic' # 'FileBased'
+  splitting     = kwargs.get('split',      'FileBased' if year==2018 else 'Automatic')
   tag           = kwargs.get('tag',        "")
   instance      = kwargs.get('instance',   'global')
   nevents       = -1
@@ -129,25 +129,25 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   for dataset in samples:
     
     # INDIVIDUAL CONFIG
-    request  = (datatier.lower().replace('aod','')+'_'+shortenDASPath(dataset))[:100]
-    private  = dataset.endswith('/USER')
+    request       = (datatier.lower().replace('aod','')+'_'+shortenDASPath(dataset))[:100]
+    private       = dataset.endswith('/USER')
     if private:
-      noLocal   = True
-      inputDBS  = "https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader/"
-      whitelist = getOptimalWhitelist(dataset,instance=instance)
-      #whitelist = ['T2_CH_*','T2_DE_*','T2_IT_*']
+      ignoreLocal = True
+      inputDBS    = "https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader/"
+      whitelist   = getOptimalWhitelist(dataset,instance=instance)
+      #whitelist   = ['T2_CH_*','T2_DE_*','T2_IT_*']
     else:
-      noLocal  = False
-      inputDBS = "https://cmsweb.cern.ch/dbs/prod/%s/DBSReader/"%instance
-      whitelist = [ ]
-    outtag   = createDatasetOutTag(dataset,tag=tag)
+      ignoreLocal = False
+      inputDBS    = "https://cmsweb.cern.ch/dbs/prod/%s/DBSReader/"%instance
+      whitelist   = [ ]
+    outtag        = createDatasetOutTag(dataset,tag=tag)
     
     # PRINT
     print ">>> "+'-'*5+" Submitting... "+'-'*50
     print ">>> request     = '%s'"%bold(request)
     print ">>> dataset     = '%s'"%bold(dataset)
     print ">>> inputDBS    = '%s'"%inputDBS
-    print ">>> noLocal     = '%s'"%noLocal
+    print ">>> ignoreLocal = '%s'"%ignoreLocal
     print ">>> whitelist   = %s"%whitelist
     print ">>> outtag      = '%s'"%outtag
     print ">>> "+'-'*70
@@ -158,7 +158,7 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
     config.Data.inputDBS          = inputDBS
     #config.Data.outputPrimaryDataset = 'LQ_test' # only for 'PrivateMC'
     config.Data.outputDatasetTag  = outtag
-    config.Data.ignoreLocality    = noLocal # do not run on same site the dataset is stored on
+    config.Data.ignoreLocality    = ignoreLocal # do not run on same site the dataset is stored on
     if whitelist:
       config.Site.whitelist       = whitelist
     print str(config).rstrip('\n')
@@ -170,18 +170,18 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
       submitCRABConfig(config)
     else:
       while True:
-        submit = raw_input(">>> Do you want to submit this job to CRAB? [y/n]? ")
-        if any(s in submit.lower() for s in ['quit','exit']):
+        submit = raw_input(">>> Do you want to submit this job to CRAB? [y/n]? ").strip().lower()
+        if any(s in submit for s in ['quit','exit']):
           print ">>> Exiting..."
           exit(0)
-        elif 'force' in submit.lower():
+        elif 'force' in submit:
           submit = 'y'
           force = True
-        if 'y' in submit.lower():
+        if 'y' in submit:
           print ">>> Submitting..."
           submitCRABConfig(config)
           break
-        elif 'n' in submit.lower():
+        elif 'n' in submit:
           print ">>> Not submitting."
           break
         else:
