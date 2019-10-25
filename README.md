@@ -39,7 +39,8 @@ sed "s/\(site\s*=\s*\)'\w+'/\1'T2_CH_CSCS'/" submit_crab.py
 ``` 
 
 
-### DeepTauID
+### DeepTau2017v2p1
+
 In case you want to use `DeepTau2017v2p1` in `102X` samples, see this [this TWiki page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Running_of_the_DeepTauIDs_ver_20), and setup `CMSSW` as
 ```
 CMSSW=CMSSW_10_2_16_patch1
@@ -111,14 +112,9 @@ samples_miniAOD.py
 samples_nanoAOD.py
 ```
 
-Then you can submit with
+Then you can submit a specific parameter-set configuration file as
 ```
-./submit_crab.py -y 2017
-```
-
-To submit a specific parameter-set configuration file, do e.g.
-```
-./submit_crab.py -y 2017 -s pset_nanoAODv5.py
+./submit_crab.py pset_nanoAODv5.py -y 2017
 ```
 
 To filter a specific sample, do e.g.
@@ -168,3 +164,13 @@ More [notes](https://www.evernote.com/l/Ac8PKYGpaJxJArj4eng5ed95_wvpzwSNTgc).
 * **2016**: [list](samples_2016.cfg), [DAS](https://cmsweb.cern.ch/das/request?view=plain&limit=50&instance=prod%2Fglobal&input=dataset%3D%2F*%2FRunIISummer16NanoAODv4-PUMoriond17_Nano14Dec2018_102X_mcRun2_asymptotic*%2FNANOAODSIM), [notes](https://www.evernote.com/l/Ac9nVeF2tcdJI7R-is1KPT2Ukv7A260zNX0)
 * **2017**: [list](samples_2017.cfg), [DAS](https://cmsweb.cern.ch/das/request?view=plain&limit=50&instance=prod%2Fglobal&input=dataset+dataset%3D%2F*%2F*94X*_realistic_v14*%2FNANOAOD*), [notes](https://www.evernote.com/l/Ac8WfL3Mzx1MrKdm1LfIOl-F-j7NeScPKxs)
 * **2018**: [list](samples_2018.cfg), [DAS](https://cmsweb.cern.ch/das/request?view=plain&limit=50&instance=prod%2Fglobal&input=%2F*%2FRunIIAutumn18NanoAODv4-Nano14Dec2018*%2FNANOAODSIM), [notes](https://www.evernote.com/l/Ac9yyi7wtg9LaYgxOIz11jFyzLV0ztkemtE)
+
+
+### PSet
+
+Get a template of a `PSet` configuration file:
+1. Go to [MCM](https://cms-pdmv.cern.ch/mcm/)
+2. Go to 'Request' > 'Output Dataset', and type in your favorite sample, e.g. `/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM`.
+3. In the 'Actions' column, click on the 'Get setup command' symbol (circle with down arrow).
+4. Copy-paste the `cmsDriver.py` the command line (in a `CMSSW` environment).
+5. You will find a configuration file called `<prep-id>.py`.
