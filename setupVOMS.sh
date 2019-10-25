@@ -1,7 +1,7 @@
 #! /bin/bash
 function peval { echo ">>> $@"; eval "$@"; }
 
-printf ">>> voms-proxy-info --timeleft\n"
+echo ">>> voms-proxy-info --timeleft"
 TIMELEFT=$(voms-proxy-info --timeleft)
 if [[ $TIMELEFT -lt 36000 ]]; then # 10 hours
    if [[ $TIMELEFT -gt 0 ]]; then
