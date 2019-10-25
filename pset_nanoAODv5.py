@@ -14,7 +14,7 @@ from utils import formatTag
 sample     = "" #"test"
 index      = -1
 year       = 2018
-maxEvents  = -1
+maxEvents  = 100
 nThreads   = 1
 director   = "file:root://xrootd-cms.infn.it/"
 infiles    = [
@@ -52,9 +52,9 @@ nThreads = options.nThreads
 globaltag = globaltags.get(year,'auto:phase1_2017_realistic')
 era = eras.get(year,None)
 if index>0:
-  outfile = "file:nanoAOD_%s%s_%s.root"%(formatTag(sample),year,index)
+  outfile = "file:nanoAOD_%s%s_%s.root"%(year,formatTag(sample),index)
 else:
-  outfile = "file:nanoAOD_%s_%s.root"%(formatTag(sample),year)
+  outfile = "file:nanoAOD_%s%s.root"%(year,formatTag(sample))
 
 print ">>> sample    = '%s'"%sample
 print ">>> index     = %s"%index

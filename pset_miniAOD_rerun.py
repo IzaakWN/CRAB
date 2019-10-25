@@ -46,9 +46,9 @@ nThreads = options.nThreads
 ###  index  = args[3]
 globaltag = globaltags.get(year,'auto:phase1_2017_realistic')
 if index>0:
-  outfile = "file:miniAOD_rerun_%s%s_%s.root"%(formatTag(sample),year,index)
+  outfile = "file:miniAOD_rerun_%s%s_%s.root"%(year,formatTag(sample),index)
 else:
-  outfile = "file:miniAOD_rerun_%s%s.root"%(formatTag(sample),year)
+  outfile = "file:miniAOD_rerun_%s%s.root"%(year,formatTag(sample))
 
 print ">>> sample    = '%s'"%sample
 print ">>> index     = '%s'"%index
