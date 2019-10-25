@@ -1,5 +1,6 @@
 # Author: Izaak Neutelings (October, 2019)
 from fnmatch import fnmatch
+import Utilities.General.cmssw_das_client as dasclient
 
 def green(string,**kwargs):
   return "\x1b[0;32;40m%s\033[0m"%string
@@ -42,3 +43,20 @@ def filterSamplesWithPattern(strings,patterns):
   """Filter list of strings according to some given pattern(s)."""
   newlist = [s for s in strings if matchSampleToPattern(s,patterns)]
   return newlist
+  
+
+def getSampleSites(dataset,instance=None):
+  """Get the sites a given dataset (DAS path) is stored on."""
+  query = "site dataset=%s"%(dataset)
+  if not instance and dataset.endswith('/USER'):
+    instance = 'phys03'
+  if instance:
+    query += " instance=prod/%s"%instance
+  data  = dasclient.get_data(query)['data']
+  sites = [ ]
+  for d in data:
+    for site in d['site']:
+      if 'TAPE' not in site['se'] and site['name'] not in sites:
+        sites.append(str(site['name']))
+  return sites
+  

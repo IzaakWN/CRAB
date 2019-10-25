@@ -5,21 +5,22 @@ from CRABClient.UserUtilities import config as crabconfig
 from CRABAPI.RawCommand import crabCommand
 from CRABClient.ClientExceptions import ClientException
 from httplib import HTTPException
-from utils import filterSamplesWithPattern, formatTag, bold
+from utils import filterSamplesWithPattern, getSampleSites, formatTag, bold
 import re
 
 
 def main(args):
   
-  years   = args.years
-  psets   = args.psets if args.psets else [ 
+  years    = args.years
+  psets    = args.psets if args.psets else [ 
     #"pset_miniAOD_rerun.py",
     "pset_nanoAODv5.py",
   ]
-  samples = args.samples
-  force   = args.force
-  test    = args.test
-  tag     = "DeepTau2017v2p1"
+  samples  = args.samples
+  priority = args.priority
+  force    = args.force
+  test     = args.test
+  tag      = "DeepTau2017v2p1"
   
   for pset in psets:
     
@@ -36,11 +37,12 @@ def main(args):
       datasets = samplesets.get(year,[])
       if samples:
         datasets = filterSamplesWithPattern(datasets,samples)
-      submitSampleToCRAB(year,datasets,pset=pset,tag=tag,test=test,force=force)
+      submitSampleToCRAB(pset,year,datasets,tag=tag,priority=priority,
+                         test=test,force=force)
   
 
 
-def submitSampleToCRAB(year,samples,**kwargs):
+def submitSampleToCRAB(pset,year,samples,**kwargs):
   """Create a CRAB configuration and submit a given list of samples."""
   
   assert isinstance(samples,list), "Samples list should be a list or tuple! Given %s"%samples
@@ -49,7 +51,6 @@ def submitSampleToCRAB(year,samples,**kwargs):
   year          = year
   test          = kwargs.get('test',       0)
   force         = kwargs.get('force',      False)
-  psetName      = kwargs.get('pset',       "pset_miniAOD_rerun.py")
   pluginName    = 'Analysis' #'PrivateMC'
   splitting     = 'Automatic' # 'FileBased'
   tag           = kwargs.get('tag',        "")
@@ -61,7 +62,7 @@ def submitSampleToCRAB(year,samples,**kwargs):
   maxRunTime    = kwargs.get('maxRunTime', 6*60) #1250 # minutes
   priority      = kwargs.get('priority',   10)
   workArea      = 'crab_projects'
-  datatier      = 'nanoAOD' if 'nanoaod' in psetName.lower() else 'miniAOD'
+  datatier      = 'nanoAOD' if 'nanoaod' in pset.lower() else 'miniAOD'
   outdir        = '/store/user/%s/%s_%s%s'%(getUsernameFromSiteDB(),datatier,year,formatTag(tag))
   publish       = True #and False
   site          = 'T2_CH_CSCS'
@@ -81,7 +82,7 @@ def submitSampleToCRAB(year,samples,**kwargs):
   # PRINT
   print ">>> "+'='*70
   print ">>> year        = '%s"%year
-  print ">>> psetName    = '%s'"%bold(psetName)
+  print ">>> pset        = '%s'"%bold(pset)
   print ">>> pluginName  = '%s'"%pluginName
   print ">>> splitting   = '%s'"%splitting
   print ">>> tag         = '%s'"%bold(tag)
@@ -109,7 +110,7 @@ def submitSampleToCRAB(year,samples,**kwargs):
   config.General.transferLogs       = False
   
   config.JobType.pluginName         = pluginName
-  config.JobType.psetName           = psetName
+  config.JobType.psetName           = pset
   config.JobType.pyCfgParams        = [ "year=%s"%year, "nThreads=%s"%ncores ]
   config.JobType.numCores           = ncores
   if maxRunTime>0:
@@ -126,21 +127,43 @@ def submitSampleToCRAB(year,samples,**kwargs):
   config.Data.publication           = publish
   
   for dataset in samples:
+    
+    # INDIVIDUAL CONFIG
     request  = (datatier.lower().replace('aod','')+'_'+shortenDASPath(dataset))[:100]
-    inputDBS = "https://cmsweb.cern.ch/dbs/prod/%s/DBSReader/"%('phys03' if dataset.endswith('/USER') else instance)
+    private  = dataset.endswith('/USER')
+    if private:
+      noLocal   = True
+      inputDBS  = "https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader/"
+      whitelist = getOptimalWhitelist(dataset,instance=instance)
+      #whitelist = ['T2_CH_*','T2_DE_*','T2_IT_*']
+    else:
+      noLocal  = False
+      inputDBS = "https://cmsweb.cern.ch/dbs/prod/%s/DBSReader/"%instance
+      whitelist = [ ]
     outtag   = createDatasetOutTag(dataset,tag=tag)
+    
+    # PRINT
     print ">>> "+'-'*5+" Submitting... "+'-'*50
     print ">>> request     = '%s'"%bold(request)
     print ">>> dataset     = '%s'"%bold(dataset)
     print ">>> inputDBS    = '%s'"%inputDBS
+    print ">>> noLocal     = '%s'"%noLocal
+    print ">>> whitelist   = %s"%whitelist
     print ">>> outtag      = '%s'"%outtag
     print ">>> "+'-'*70
+    
+    # INDIVIDUAL CONFIG
     config.General.requestName    = request # max. 100 characters
     config.Data.inputDataset      = dataset
     config.Data.inputDBS          = inputDBS
     #config.Data.outputPrimaryDataset = 'LQ_test' # only for 'PrivateMC'
     config.Data.outputDatasetTag  = outtag
+    config.Data.ignoreLocality    = noLocal # do not run on same site the dataset is stored on
+    if whitelist:
+      config.Site.whitelist       = whitelist
     print str(config).rstrip('\n')
+    
+    # SUBMIT
     if force:
       print ">>> Do you want to submit this job to CRAB? [y/n]? force"
       print ">>> Submitting..."
@@ -163,6 +186,7 @@ def submitSampleToCRAB(year,samples,**kwargs):
           break
         else:
           print ">>> '%s' is not a valid answer, please choose 'y' or 'n'."%submit
+    
     print ">>> "
   
 
@@ -180,7 +204,30 @@ def submitCRABConfig(config):
   """Submit a single config."""
   executeCRABCommand('submit',config=config)
   
-
+countrypattern = re.compile(r"T2_([A-Z]{2})_.+")
+def getOptimalWhitelist(dataset,instance='global'):
+  """Get optimal whitelist."""
+  # https://dashb-ssb.cern.ch/dashboard/request.py/siteviewhome
+  sites     = getSampleSites(dataset,instance=None)
+  countries = [ ]
+  print sites
+  for site in sites:
+    countries += countrypattern.findall(site)
+  whitelist = [ ]
+  if any(c in ['US','CA','MX'] for c in countries): # America
+    whitelist += ['T2_US_*','T2_CA_*','T2_MX_*']
+  if any(c in ['CH','DE','IT','FR','BE','UK','FI','ES','PT'] for c in countries): # West-Europe
+    whitelist += ['T2_CH_*','T2_DE_*','T2_IT_*','T2_FR_*','T2_BE_*','T2_UK_*','T2_FI_*','T2_ES_*','T2_PT_*']
+  if any(c in ['EE','HR','GR','PL','RU','UA','HU','BY','BG'] for c in countries): # East-Europe
+    whitelist += ['T2_EE_*','T2_HR_*','T2_GR_*','T2_PL_*','T2_RU_*','T2_UA_*','T2_HU_*','T2_BY_*','T2_BG_*']
+  if any(c in ['TR','IR','IN'] for c in countries): # Middle-East
+    whitelist += ['T2_TR_*','T2_IR_*','T2_IN_*']
+  if any(c in ['TW','CN','KR','TH'] for c in countries): # Asia
+    whitelist += ['T2_TW_*','T2_CN_*','T2_KR_*','T2_IN_*','T2_TH_*']
+  if not whitelist:
+    whitelist = sites or ['T2_*']
+  return whitelist
+  
 
 def createDatasetOutTag(dataset,tag=''):
   """Create dataset output tag from DAS path."""
@@ -193,7 +240,7 @@ def createDatasetOutTag(dataset,tag=''):
   
 def createRequest(string,year=None,tag=""):
   """Create request."""
-  request = string.replace('pset_','').replace('.py','')
+  request = string.split('/')[-1].replace('pset_','').replace('.py','')
   if year and str(year) not in request:
     request += "_%s"%(year)
   return request
@@ -233,16 +280,18 @@ def getCampaign(daspath):
 if __name__ == '__main__':
   from argparse import ArgumentParser
   parser = ArgumentParser()
-  parser.add_argument('-f', '--force',   dest='force', action='store_true', default=False,
-                                         help="submit jobs without asking confirmation" )
-  parser.add_argument('-y', '--year',    dest='years', choices=[2016,2017,2018], type=int, nargs='+', default=[2017], action='store',
-                      metavar="YEAR",    help="select year" )
-  parser.add_argument('-s', '--sample',  dest='samples', type=str, nargs='+', default=[ ], action='store',
-                      metavar="DATASET", help="samples to submit" )
-  parser.add_argument('-p', '--pset',    dest='psets', type=str, nargs='+', default=[ ], action='store',
-                      metavar="SCRIPT",  help="parameter-set configuration file to submit" )
-  parser.add_argument('-t', '--test',    dest='test', type=int, nargs='?', default=-1, const=1,
-                      metavar="NJOBS",   help="submit test job(s)" )
+  parser.add_argument('psets',            type=str, nargs='+', default=[ ], action='store',
+                      metavar="FILE",     help="parameter-set configuration file to submit" )
+  parser.add_argument('-f', '--force',    dest='force', action='store_true', default=False,
+                                          help="submit jobs without asking confirmation" )
+  parser.add_argument('-y', '--year',     dest='years', choices=[2016,2017,2018], type=int, nargs='+', default=[2017], action='store',
+                      metavar="YEAR",     help="select year" )
+  parser.add_argument('-s', '--sample',   dest='samples', type=str, nargs='+', default=[ ], action='store',
+                      metavar="DATASET",  help="samples to submit" )
+  parser.add_argument('-p', '--priority', dest='priority', type=int, default=10, action='store',
+                      metavar="PRIORITY", help="submit with priority (default=10)" )
+  parser.add_argument('-t', '--test',     dest='test', type=int, nargs='?', default=-1, const=1,
+                      metavar="NJOBS",    help="submit test job(s)" )
   args = parser.parse_args()
   print ">>> "
   main(args)
