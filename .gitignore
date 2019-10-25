@@ -1,0 +1,7 @@
+*.pyc
+*~
+*.root
+*.log
+core.*
+CMSSW_*
+crab_projects
