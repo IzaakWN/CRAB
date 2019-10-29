@@ -56,9 +56,7 @@ def getSampleSites(dataset,instance=None):
     instance = 'phys03'
   if instance:
     query += " instance=prod/%s"%instance
-  print query
   data  = dasclient.get_data(query)['data']
-  print data
   sites = [ ]
   for d in data:
     for site in d['site']:

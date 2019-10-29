@@ -5,6 +5,7 @@
 print ">>> "+"%s start pset_miniAOD_rerun.py %s"%('-'*15,'-'*15)
 import FWCore.ParameterSet.Config as cms
 from utils import formatTag
+from eras import globaltags
 
 # DEFAULTS
 sample         = "" #"test"
@@ -22,13 +23,7 @@ infiles        = [
   "file:input/VLQ-p_M1100_%s.root"%year,
   #"file:miniAOD_%s_%s_%s.root"%(sample,year,index),
 ]
-globaltags = {
-  # https://docs.google.com/presentation/d/1YTANRT_ZeL5VubnFq7lNGHKsiD7D3sDiOPNgXUYVI0I/edit#slide=id.g61f8771f52_33_8
-  'default': 'auto:phase1_2017_realistic',
-  2016:      '94X_mcRun2_asymptotic_v3',
-  2017:      '94X_mc2017_realistic_v17', #'94X_mc2017_realistic_v14',
-  2018:      '102X_upgrade2018_realistic_v20', #'102X_upgrade2018_realistic_v15',
-}
+
 
 # USER OPTIONS
 from FWCore.ParameterSet.VarParsing import VarParsing
@@ -44,7 +39,7 @@ nThreads = options.nThreads
 ###if len(args)>=4:
 ###  sample = args[2]
 ###  index  = args[3]
-globaltag = globaltags.get(year,'auto:phase1_2017_realistic')
+globaltag = globaltags['miniAOD'].get(year,'auto:phase1_2017_realistic')
 if index>0:
   outfile = "file:miniAOD_rerun_%s%s_%s.root"%(year,formatTag(sample),index)
 else:

@@ -6,6 +6,7 @@ from CRABAPI.RawCommand import crabCommand
 from CRABClient.ClientExceptions import ClientException
 from httplib import HTTPException
 from utils import filterSamplesWithPattern, getSampleSites, formatTag, bold
+from eras import globaltags
 import re
 
 
@@ -52,6 +53,8 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   test          = kwargs.get('test',       0)
   force         = kwargs.get('force',      False)
   datatier      = 'nanoAOD' if 'nanoaod' in pset.lower() else 'miniAOD'
+  version       = re.findall("(?<=AOD)v\d+",pset)
+  version       = version[0] if version else ""
   pluginName    = 'Analysis' #'PrivateMC'
   splitting     = kwargs.get('split',      'FileBased' if year==2018 or datatier=='nanoAOD' else 'Automatic')
   tag           = kwargs.get('tag',        "")
@@ -81,7 +84,7 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   
   # PRINT
   print ">>> "+'='*70
-  print ">>> year        = '%s"%year
+  print ">>> year        = %s"%year
   print ">>> pset        = '%s'"%bold(pset)
   print ">>> pluginName  = '%s'"%pluginName
   print ">>> splitting   = '%s'"%splitting
@@ -131,24 +134,26 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
     # INDIVIDUAL CONFIG
     request       = (datatier.lower().replace('aod','')+'_'+shortenDASPath(dataset))[:100]
     private       = dataset.endswith('/USER')
+    sites         = getSampleSites(dataset,instance=None)
     if private:
       ignoreLocal = True
       inputDBS    = "https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader/"
-      whitelist   = getOptimalWhitelist(dataset,instance=instance)
+      whitelist   = getOptimalWhitelist(sites,instance=instance)
       #whitelist   = ['T2_CH_*','T2_DE_*','T2_IT_*']
     else:
       ignoreLocal = False
       inputDBS    = "https://cmsweb.cern.ch/dbs/prod/%s/DBSReader/"%instance
       whitelist   = [ ]
-    outtag        = createDatasetOutTag(dataset,tag=tag)
+    outtag        = createDatasetOutTag(dataset,tag=tag,datatier=datatier,version=version,year=year)
     
     # PRINT
     print ">>> "+'-'*5+" Submitting... "+'-'*50
     print ">>> request     = '%s'"%bold(request)
     print ">>> dataset     = '%s'"%bold(dataset)
     print ">>> inputDBS    = '%s'"%inputDBS
-    print ">>> ignoreLocal = '%s'"%ignoreLocal
+    print ">>> sites       = %s"%sites
     print ">>> whitelist   = %s"%whitelist
+    print ">>> ignoreLocal = %s"%ignoreLocal
     print ">>> outtag      = '%s'"%outtag
     print ">>> "+'-'*70
     
@@ -162,6 +167,7 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
     if whitelist:
       config.Site.whitelist       = whitelist
     print str(config).rstrip('\n')
+    print ">>> "+'-'*70
     
     # SUBMIT
     if force:
@@ -205,12 +211,15 @@ def submitCRABConfig(config):
   executeCRABCommand('submit',config=config)
   
 countrypattern = re.compile(r"T2_([A-Z]{2})_.+")
-def getOptimalWhitelist(dataset,instance='global'):
-  """Get optimal whitelist."""
+def getOptimalWhitelistForDataset(dataset,instance='global'):
+  """Get optimal whitelist for a DAS dataset."""
   # https://dashb-ssb.cern.ch/dashboard/request.py/siteviewhome
-  sites     = getSampleSites(dataset,instance=None)
+  sites = getSampleSites(dataset,instance=None)
+  return getOptimalWhitelist(sites)
+  
+def getOptimalWhitelist(sites,instance='global'):
+  """Get optimal whitelist for a list of sites."""
   countries = [ ]
-  print sites
   for site in sites:
     countries += countrypattern.findall(site)
   whitelist = [ ]
@@ -228,39 +237,25 @@ def getOptimalWhitelist(dataset,instance='global'):
     whitelist = sites or ['T2_*']
   return whitelist
   
-
-def createDatasetOutTag(dataset,tag=''):
-  """Create dataset output tag from DAS path."""
-  outtags = dataset.strip('/').split('/')
-  assert len(outtags)>=2, "Invalid DAS path '%s'!"%(dataset)
-  outtag  = outtags[1]
-  if tag:
-    outtag += '_'+tag.lstrip('_')
-  return outtag
-  
-def createRequest(string,year=None,tag=""):
-  """Create request."""
-  request = string.split('/')[-1].replace('pset_','').replace('.py','')
-  if year and str(year) not in request:
-    request += "_%s"%(year)
-  return request
   
 hashpattern = re.compile(r"-(?!v)[0-9a-z]{5,}$")
+minipattern = re.compile(r"[Mm]iniAOD(?:v\d+)?")
 def shortenDASPath(daspath):
   """Shorten a long DAS path."""
   replace = [
-    ('Autumn18',          "RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15"),
-    ('Autumn18FlatPU',    "RunIIAutumn18MiniAOD-FlatPU0to70_102X_upgrade2018_realistic_v15"),
-    ('Autumn18FlatPURAW', "RunIIAutumn18MiniAOD-FlatPU0to70RAW_102X_upgrade2018_realistic_v15"),
-    ('Fall17',            "RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14"),
-    ('Fall17newPMX',      "RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14"),
-    ('Fall17RECOSIM',     "RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14"),
-    ('Fall17v2',          "RunIIFall17MiniAODv2-PU2017_12Apr2018_v2_94X_mc2017_realistic_v14"),
-    ('Summer16',          "RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3"),
-    ("MG",                "madgraph"),
-    ("PY",                "pythia"),
-    ("",                  "_13TeV"),
-    ("",                  "Tune"),
+    ('Aut18',          "RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15"),
+    ('Aut18FlatPU',    "RunIIAutumn18MiniAOD-FlatPU0to70_102X_upgrade2018_realistic_v15"),
+    ('Aut18FlatPURAW', "RunIIAutumn18MiniAOD-FlatPU0to70RAW_102X_upgrade2018_realistic_v15"),
+    ('Fall17',         "RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14"),
+    ('Fall17newPMX',   "RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14"),
+    ('Fall17RECOSIM',  "RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14"),
+    ('Fall17v2',       "RunIIFall17MiniAODv2-PU2017_12Apr2018_v2_94X_mc2017_realistic_v14"),
+    ('Sum16',          "RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3"),
+    ("MG",             "madgraph"),
+    ("PY",             "pythia"),
+    ("",               "_13TeV"),
+    ("",               "Tune"),
+    ("Incl",           "Inclusive"),
   ]
   daspath = '_'.join(daspath.split('/')[1:-1])
   for short, long in replace:
@@ -274,6 +269,32 @@ def getCampaign(daspath):
     if campaign in daspath:
       return campaign
   return daspath
+
+def createDatasetOutTag(dataset,tag='',datatier=None,year=None,version=""):
+  """Create dataset output tag from DAS path."""
+  outtags = dataset.strip('/').split('/')
+  assert len(outtags)>=2, "Invalid DAS path '%s'!"%(dataset)
+  username = getUsernameFromSiteDB()+'-'
+  outtag   = outtags[1]
+  outtag   = outtag.replace(username,"")
+  outtag   = hashpattern.sub("",outtag)
+  if datatier=='nanoAOD':
+    if 'miniaod' in outtag.lower():
+      newtier = 'NanoAOD'+version
+      outtag  = minipattern.sub(newtier,outtag)
+    globaltag = globaltags['nanoAOD'].get(year,False)
+    if globaltag:
+      outtag = outtag[:outtag.index(newtier)+len(newtier)]+'_'+globaltag
+  if tag and not outtag.endswith(tag):
+    outtag += formatTag(tag)
+  return outtag
+  
+def createRequest(string,year=None,tag=""):
+  """Create request."""
+  request = string.split('/')[-1].replace('pset_','').replace('.py','')
+  if year and str(year) not in request:
+    request += "_%s"%(year)
+  return request
   
 
 

@@ -7,8 +7,8 @@
 #  step1 --filein dbs:/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM --fileout file:MUO-RunIIAutumn18NanoAODv5-00014.root --mc --eventcontent NANOEDMAODSIM --datatier NANOAODSIM --conditions 102X_upgrade2018_realistic_v19 --step NANO --nThreads 2 --era Run2_2018,run2_nanoAOD_102Xv1 --python_filename MUO-RunIIAutumn18NanoAODv5-00014_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 100
 print ">>> "+"%s start pset_nanoAODv5.py %s"%('-'*15,'-'*15)
 import FWCore.ParameterSet.Config as cms
-from Configuration.StandardSequences.Eras import eras
 from utils import formatTag
+from eras import globaltags, eras
 
 # DEFAULTS
 sample     = "" #"test"
@@ -22,18 +22,6 @@ infiles    = [
   "file:input/VLQ-p_M1100_2018_rerun.root",
 ]
 nanoAOD    = '14Dec2018'
-globaltags = {
-  # https://docs.google.com/presentation/d/1YTANRT_ZeL5VubnFq7lNGHKsiD7D3sDiOPNgXUYVI0I/edit#slide=id.g61f8771f52_33_8
-  'default': 'auto:phase1_2017_realistic',
-  2016:      '102X_mcRun2_asymptotic_v7',
-  2017:      '102X_mc2017_realistic_v7', #'94X_mc2017_realistic_v14',
-  2018:      '102X_upgrade2018_realistic_v19', #'102X_upgrade2018_realistic_v20', #'102X_upgrade2018_realistic_v15',
-}
-eras = {
-  2016: eras.run2_nanoAOD_94X2016,
-  2017: eras.run2_nanoAOD_94XMiniAODv2,
-  2018: eras.run2_nanoAOD_102Xv1,
-}
 
 # USER OPTIONS
 from FWCore.ParameterSet.VarParsing import VarParsing
@@ -49,8 +37,8 @@ nThreads = options.nThreads
 ###if len(args)>=4:
 ###  sample = args[2]
 ###  index  = args[3]
-globaltag = globaltags.get(year,'auto:phase1_2017_realistic')
-era = eras.get(year,None)
+globaltag = globaltags['nanoAOD'].get(year,'auto:phase1_2017_realistic')
+era = eras['nanoAOD'].get(year,None)
 if index>0:
   outfile = "file:nanoAOD_%s%s_%s.root"%(year,formatTag(sample),index)
 else:
