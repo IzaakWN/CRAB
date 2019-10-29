@@ -31,7 +31,7 @@ def matchSampleToPattern(sample,patterns):
   if not isinstance(patterns,list):
     patterns = [patterns]
   for pattern in patterns:
-    if '*' in pattern or '?' in pattern:
+    if any(p in pattern for p in ['*','?','[','^']):
       if fnmatch(sample,pattern+'*'):
         return True
     else:
@@ -39,11 +39,15 @@ def matchSampleToPattern(sample,patterns):
         return True
   return False
   
-def filterSamplesWithPattern(strings,patterns):
+def filterSamplesWithPattern(strings,patterns,veto=False):
   """Filter list of strings according to some given pattern(s)."""
-  newlist = [s for s in strings if matchSampleToPattern(s,patterns)]
+  if veto:
+    newlist = [s for s in strings if not matchSampleToPattern(s,patterns)]
+  else:
+    newlist = [s for s in strings if matchSampleToPattern(s,patterns)]
   return newlist
   
+
 
 def getSampleSites(dataset,instance=None):
   """Get the sites a given dataset (DAS path) is stored on."""
@@ -52,11 +56,13 @@ def getSampleSites(dataset,instance=None):
     instance = 'phys03'
   if instance:
     query += " instance=prod/%s"%instance
+  print query
   data  = dasclient.get_data(query)['data']
+  print data
   sites = [ ]
   for d in data:
     for site in d['site']:
-      if 'TAPE' not in site['se'] and site['name'] not in sites:
+      if 'TAPE' not in site.get('se','') and site['name'] not in sites:
         sites.append(str(site['name']))
   return sites
   
