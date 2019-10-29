@@ -16,6 +16,14 @@ for arg in "${@:2}"; do
   [ "${arg:0:2}" = '--' ] && OPTS+="$arg " || TASKS+="$arg "
 done
 
+# CHECK COMMAND
+CMDS="submit resubmit status report kill rm"
+CMS_VALID=0
+for cmd in $CMDS; do
+  [ $cmd = $CMD ] && CMS_VALID=1 && break
+done
+[ $CMS_VALID -lt 1 ] && echo ">>> '$CMD' not a valid command to crab.sh, please choose from: '${CMDS// /', '}'" && exit 1
+
 # EXECUTE
 if [ "$CMD" = "rm" ]; then
   peval "rm -rf $TASKS"
