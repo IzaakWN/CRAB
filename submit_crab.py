@@ -261,6 +261,7 @@ def shortenDASPath(daspath):
   for short, long in replace:
     daspath = daspath.replace(long,short)
   daspath = hashpattern.sub("",daspath)
+  daspath = daspath.replace(getUsernameFromSiteDB()+'-',"")
   return daspath
   
 def getCampaign(daspath):
@@ -269,14 +270,13 @@ def getCampaign(daspath):
     if campaign in daspath:
       return campaign
   return daspath
-
+  
 def createDatasetOutTag(dataset,tag='',datatier=None,year=None,version=""):
   """Create dataset output tag from DAS path."""
   outtags = dataset.strip('/').split('/')
   assert len(outtags)>=2, "Invalid DAS path '%s'!"%(dataset)
-  username = getUsernameFromSiteDB()+'-'
   outtag   = outtags[1]
-  outtag   = outtag.replace(username,"")
+  outtag   = outtag.replace(getUsernameFromSiteDB()+'-',"")
   outtag   = hashpattern.sub("",outtag)
   if datatier=='nanoAOD':
     if 'miniaod' in outtag.lower():
