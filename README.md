@@ -152,6 +152,8 @@ dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
 * Tutorial: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial
 * Configuration: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
 * Commands: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Commands
+* FAQ: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ
+* Dashboard: https://monit-grafana.cern.ch (Jobs > CMS Task Monitoring GlobalView > Select User > `<username>`)
 
 
 ### NanoAOD
