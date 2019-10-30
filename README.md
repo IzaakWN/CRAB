@@ -128,9 +128,15 @@ To run test job(s), do e.g.
 ./submit_crab.py -y 2017 -t 2  # two test jobs
 ```
 
-Check the task status with (replacing `<request>`)
+Check the task status, and resubmit if needed as:
 ```
-crab status -d crab_projects/<request>
+crab status -d crab_projects/crab_<request>
+crab resubmit -d crab_projects/crab_<request>
+```
+replacing `<request>`. Or, use the [`crab.sh`](crab.sh) script to check many directories at once
+```
+crab.sh status crab_projects/crab_*
+crab.sh resubmit crab_projects/crab_*
 ```
 
 If you publish your output files (default, if it is not a test job), you can retrieve them in DAS with (replacing `<user>`)
