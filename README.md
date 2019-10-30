@@ -133,7 +133,7 @@ Check the task status, and resubmit if needed as:
 crab status -d crab_projects/crab_<request>
 crab resubmit -d crab_projects/crab_<request>
 ```
-replacing `<request>`. Or, use the [`crab.sh`](crab.sh) script to check many directories at once
+replacing `<request>`. Or, use the local [`crab.sh`](crab.sh) script to check many directories at once
 ```
 crab.sh status crab_projects/crab_*
 crab.sh resubmit crab_projects/crab_*
