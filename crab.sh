@@ -1,6 +1,7 @@
 #! /bin/bash
 # Author: Izaak Neutelings (October, 2019)
 function peval { echo -e ">>> \e[1m$@\e[0m"; eval "$@"; }
+#set -e # exit on first error
 
 # ENSURE ARGUMENTS
 if [[ $# -lt 2 ]]; then

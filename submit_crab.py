@@ -65,7 +65,7 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   ncores        = kwargs.get('ncores',     1) # make sure nCores > nThreads in pset.py
   maxRunTime    = kwargs.get('maxRunTime', 6*60) #1250 # minutes
   priority      = kwargs.get('priority',   10)
-  workArea      = 'crab_projects'
+  workArea      = "crab_tasks" #"crab_projects"
   outdir        = '/store/user/%s/%s_%s%s'%(getUsernameFromSiteDB(),datatier,year,formatTag(tag))
   publish       = True #and False
   site          = 'T2_CH_CSCS'
@@ -302,11 +302,11 @@ if __name__ == '__main__':
   from argparse import ArgumentParser
   parser = ArgumentParser()
   parser.add_argument('pset',             type=str, action='store',
-                      metavar="FILE",     help="parameter-set configuration file to submit" )
+                      metavar='FILE',     help="parameter-set configuration file to submit" )
   parser.add_argument('-f', '--force',    dest='force', action='store_true', default=False,
                                           help="submit jobs without asking confirmation" )
   parser.add_argument('-y', '--year',     dest='years', choices=[2016,2017,2018], type=int, nargs='+', default=[2017], action='store',
-                      metavar="YEAR",     help="select year" )
+                      metavar='YEAR',     help="select year" )
   parser.add_argument('-s', '--sample',   dest='samples', type=str, nargs='+', default=[ ], action='store',
                       metavar='DATASET',  help="samples to submit" )
   parser.add_argument('-x', '--veto',     dest='vetoes', nargs='+', default=[ ], action='store',
@@ -314,7 +314,7 @@ if __name__ == '__main__':
   parser.add_argument('-p', '--priority', dest='priority', type=int, default=10, action='store',
                       metavar='PRIORITY', help="submit with priority (default=10)" )
   parser.add_argument('-t', '--test',     dest='test', type=int, nargs='?', default=-1, const=1,
-                      metavar="NJOBS",    help="submit test job(s)" )
+                      metavar='NJOBS',    help="submit test job(s)" )
   args = parser.parse_args()
   print ">>> "
   main(args)

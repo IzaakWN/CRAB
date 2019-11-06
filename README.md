@@ -145,6 +145,37 @@ dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
 ```
 
 
+
+## Event generation
+
+### MadGraph Gridpack generation
+Before you can generate MadGraph events with CMSSW, it's useful to create a gridpack, as described [here](https://twiki.cern.ch/twiki/bin/viewauth/CMS/QuickGuideMadGraph5aMCatNLO), or install
+```
+git clone git@github.com:cms-sw/genproductions.git genproductions
+```
+and in a clean shell session, run
+```
+source $VO_CMS_SW_DIR/cmsset_default.sh
+cd genproductions/bin/MadGraph5_aMCatNLO/
+./gridpack_generation.sh <process name without _proc_card.dat> <card dir>
+```
+To produce a large set of MadGraph cards with varying parameters (mass, coupling strenghts, ...), you can prepare some template cards like the examples in [`cards/ScalarLQ_Single/ScalarLQ_Single_template_*.dat`](cards/ScalarLQ_Single), and use `create_cards.py` as e.g.
+```
+./create_cards.py cards/ScalarLQ_Single/ScalarLQ_Single_template_*.dat -m 1000 -p LAMBDA=0.1,1.0,1.5
+```
+Produce the cards and gridpacks in series with [`generate_gridpacks.py`](generate_gridpacks.py), e.g.
+```
+./generate_gridpacks.py cards/ScalarLQ_Single ScalarLQ_Single -m 1000 -p LAMBDA=0.1,1.0,1.5
+```
+
+### Event generation
+Produce events with a gridpack with [`pset_GENSIM.py`](pset_GENSIM.py) as e.g.
+```
+cmsRun pset_GENSIM.py nevents=100 gridpack=ScalarLQ_Single_M500_slc6_amd64_gcc630_CMSSW_9_3_16_tarball.tar.xz
+```
+
+
+
 ## Notes
 
 ### CRAB3
@@ -153,7 +184,7 @@ dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
 * Configuration: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
 * Commands: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Commands
 * FAQ: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ
-* Dashboard: https://monit-grafana.cern.ch (Jobs > CMS Task Monitoring GlobalView > Select User > `<username>`)
+* Dashboard: https://monit-grafana.cern.ch (Jobs > CMS Tasks Monitoring GlobalView > Select User > `<username>`)
 
 
 ### NanoAOD

@@ -1,12 +1,26 @@
 # Author: Izaak Neutelings (October, 2019)
+import os
 from fnmatch import fnmatch
-import Utilities.General.cmssw_das_client as dasclient
-
+#if os.getenv('CMSSW_BASE'):
+#  import Utilities.General.cmssw_das_client as dasclient
+  
+def ensureDirectory(dirname):
+  """Make directory if it does not exist."""
+  if not os.path.exists(dirname):
+    os.makedirs(dirname)
+    print '>>> made directory "%s"'%(dirname)
+    if not os.path.exists(dirname):
+      print '>>> failed to make directory "%s"'%(dirname)
+  return dirname
+  
 def green(string,**kwargs):
   return "\x1b[0;32;40m%s\033[0m"%string
-
+  
 def bold(string,**kwargs):
   return "\033[1m%s\033[0m"%string
+  
+def error(string,**kwargs):
+  return "\x1b[1;31;40m%s\033[0m"%string
   
 def warning(string,**kwargs):
   """Print warning with color."""
@@ -51,6 +65,7 @@ def filterSamplesWithPattern(strings,patterns,veto=False):
 
 def getSampleSites(dataset,instance=None):
   """Get the sites a given dataset (DAS path) is stored on."""
+  import Utilities.General.cmssw_das_client as dasclient
   query = "site dataset=%s"%(dataset)
   if not instance and dataset.endswith('/USER'):
     instance = 'phys03'

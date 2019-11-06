@@ -5,7 +5,7 @@
 #  step1 --filein dbs:/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM --fileout file:SUS-RunIISummer16NanoAODv5-00085.root --mc --eventcontent NANOEDMAODSIM --datatier NANOAODSIM --conditions 102X_mcRun2_asymptotic_v7 --step NANO --nThreads 2 --era Run2_2016,run2_nanoAOD_94X2016 --python_filename SUS-RunIISummer16NanoAODv5-00085_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 100
 #  step1 --filein dbs:/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM --fileout file:MUO-RunIIFall17NanoAODv5-00001.root --mc --eventcontent NANOEDMAODSIM --datatier NANOAODSIM --conditions 102X_mc2017_realistic_v7 --step NANO --nThreads 2 --era Run2_2017,run2_nanoAOD_94XMiniAODv2 --python_filename MUO-RunIIFall17NanoAODv5-00001_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 100
 #  step1 --filein dbs:/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM --fileout file:MUO-RunIIAutumn18NanoAODv5-00014.root --mc --eventcontent NANOEDMAODSIM --datatier NANOAODSIM --conditions 102X_upgrade2018_realistic_v19 --step NANO --nThreads 2 --era Run2_2018,run2_nanoAOD_102Xv1 --python_filename MUO-RunIIAutumn18NanoAODv5-00014_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 100
-print ">>> "+"%s start pset_nanoAODv5.py %s"%('-'*15,'-'*15)
+print ">>> %s start pset_nanoAODv5.py %s"%('-'*15,'-'*15)
 import FWCore.ParameterSet.Config as cms
 from utils import formatTag
 from eras import globaltags, eras
@@ -139,4 +139,4 @@ process.particleLevelSequence.remove(process.genParticles2HepMCHiggsVtx);process
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process) # early deletion of temporary data products to reduce peak memory need
 
-print '%s done pset_nanoAODv5.py %s'%('-'*15,'-'*16)
+print ">>> %s done pset_nanoAODv5.py %s"%('-'*15,'-'*16)

@@ -23,3 +23,8 @@ eras['nanoAOD'] = {
   2017: Eras.run2_nanoAOD_94XMiniAODv2,
   2018: Eras.run2_nanoAOD_102Xv1,
 }
+eras['SIM'] = {
+  2016: Eras.Run2_2016,
+  2017: Eras.Run2_2017,
+  2018: Eras.Run2_2018,
+}

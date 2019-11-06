@@ -2,7 +2,7 @@
 # Author: Yuta Takahashi & Izaak Neutelings (October, 2019)
 # Produce pat::Tau collection with the new DNN Tau-Ids from miniAOD 12Apr2018_94X_mc2017
 # dasgoclient --limit=0 --query="dataset=/DYJetsToLL_M-50_TuneC*_13TeV-madgraphMLM-pythia8/*NanoAODv5*/NANOAOD*"
-print ">>> "+"%s start pset_miniAOD_rerun.py %s"%('-'*15,'-'*15)
+print ">>> %s start pset_miniAOD_rerun.py %s"%('-'*15,'-'*15)
 import FWCore.ParameterSet.Config as cms
 from utils import formatTag
 from eras import globaltags
@@ -33,12 +33,6 @@ options.register('nThreads', nThreads, mytype=VarParsing.varType.int)
 options.parseArguments()
 year     = options.year
 nThreads = options.nThreads
-###import sys
-###args = sys.argv
-####assert len(args)>=4, "Only %s arguments given, please provide 4!"%(len(args))
-###if len(args)>=4:
-###  sample = args[2]
-###  index  = args[3]
 globaltag = globaltags['miniAOD'].get(year,'auto:phase1_2017_realistic')
 if index>0:
   outfile = "file:miniAOD_rerun_%s%s_%s.root"%(year,formatTag(sample),index)
@@ -54,7 +48,10 @@ print ">>> infiles   = %s"%infiles
 print ">>> outfile   = %s"%outfile
 print ">>> "+'-'*69
 
+# PROCESS
 process = cms.Process('TauID')
+
+# IMPORTS
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.Geometry.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -122,4 +119,4 @@ process.options = cms.untracked.PSet(
   numberOfStreams = cms.untracked.uint32(0)
 )
 
-print ">>> "+"%s done pset_miniAOD_rerun.py %s"%('-'*15,'-'*16)
+print ">>> %s done pset_miniAOD_rerun.py %s"%('-'*15,'-'*16)
