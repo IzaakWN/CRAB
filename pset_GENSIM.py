@@ -3,7 +3,7 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: Configuration/GenProduction/python/EXO-RunIIFall18wmLHEGS-00790-fragment.py --fileout file:EXO-RunIIFall18wmLHEGS-00790.root --mc --eventcontent RAWSIM,LHE --datatier GEN-SIM,LHE --conditions 102X_upgrade2018_realistic_v11 --beamspot Realistic25ns13TeVEarly2018Collision --step LHE,GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2018 --python_filename EXO-RunIIFall18wmLHEGS-00790_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring --customise_commands process.RandomNumberGeneratorService.externalLHEProducer.initialSeed=int() -n 732
 print ">>> %s start pset_GENSIM.py %s"%('-'*15,'-'*15)
-
+import os
 import FWCore.ParameterSet.Config as cms
 from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper
 from utils import formatTag
@@ -32,20 +32,19 @@ options.register('nevents',  nevents,  mytype=VarParsing.varType.int)
 options.register('seed',     seed,     mytype=VarParsing.varType.int)
 options.register('nThreads', nThreads, mytype=VarParsing.varType.int)
 options.parseArguments()
-sample   = options.sample
-index    = options.index
-gridpack = options.gridpack
-year     = options.year
-nevents  = options.nevents
-seed     = options.seed
-nThreads = options.nThreads
+sample      = options.sample
+index       = options.index
+gridpack    = os.path.abspath(options.gridpack)
+year        = options.year
+nevents     = options.nevents
+seed        = options.seed
+nThreads    = options.nThreads
 ###globaltag = globaltags['miniAOD'].get(year,'auto:phase1_2017_realistic')
+tag         = sample
 if index>0:
-  outfile_RAW = "file:GENSIM_%s%s_%s.root"%(year,formatTag(sample),index)
-  outfile_LHE = "file:GENSIM_LHE_%s%s_%s.root"%(year,formatTag(sample),index)
-else:
-  outfile_RAW = "file:GENSIM_%s%s.root"%(year,formatTag(sample))
-  outfile_LHE = "file:GENSIM_LHE_%s%s.root"%(year,formatTag(sample))
+  tag      += formatTag('_'+str(index))
+outfile_RAW = "file:GENSIM%s.root"%(tag)
+outfile_LHE = "file:GENSIM_LHE%s.root"%(tag)
 
 print ">>> sample      = '%s'"%sample
 print ">>> index       = %s"%index
