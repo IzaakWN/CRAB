@@ -7,7 +7,8 @@ Process `miniAOD` or `nanoAOD` files with `CRAB3`.
 * [Local run](#local-run)<br>
 * [Check output](#check-output)<br>
 * [Submit](#submit)<br>
-* [Notes](#notes)
+* [Notes](#notes)<br>
+* [Event generation](#event-generation)<br>
 
 ## Installation
 
