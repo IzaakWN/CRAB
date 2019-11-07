@@ -2,12 +2,12 @@
 
 Process `miniAOD` or `nanoAOD` files with `CRAB3`.
 
-### Table of Contents  
-[Installation](#installation)<br>
-[Local run](#local-run)<br>
-[Check output](#check-output)<br>
-[Submit](#submit)<br>
-[Notes](#notes)
+#### Table of Contents  
+* [Installation](#installation)<br>
+* [Local run](#local-run)<br>
+* [Check output](#check-output)<br>
+* [Submit](#submit)<br>
+* [Notes](#notes)
 
 ## Installation
 
