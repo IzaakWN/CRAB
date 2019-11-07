@@ -5,3 +5,4 @@
 core.*
 CMSSW_*
 crab_projects
+cards/*LQ_*/*LQ_*_M*.dat

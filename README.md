@@ -205,11 +205,16 @@ More [notes](https://www.evernote.com/l/Ac8PKYGpaJxJArj4eng5ed95_wvpzwSNTgc).
 * **2018**: [list](samples_2018.cfg), [DAS](https://cmsweb.cern.ch/das/request?view=plain&limit=50&instance=prod%2Fglobal&input=%2F*%2FRunIIAutumn18NanoAODv4-Nano14Dec2018*%2FNANOAODSIM), [notes](https://www.evernote.com/l/Ac9yyi7wtg9LaYgxOIz11jFyzLV0ztkemtE)
 
 
-### PSet
+### PSet fragment
 
-Get a template of a `PSet` configuration file:
-1. Go to [MCM](https://cms-pdmv.cern.ch/mcm/)
-2. Go to 'Request' > 'Output Dataset', and type in your favorite sample, e.g. `/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM`.
-3. In the 'Actions' column, click on the 'Get setup command' symbol (circle with down arrow).
+Get a fragment of a `PSet` configuration file:
+1. Go to [MCM](https://cms-pdmv.cern.ch/mcm/).
+2. Go to 'Request' > 'Output Dataset', and type in the DAS path of your favorite sample, e.g.
+```
+/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+```
+3. In the 'Actions' column, click on the 'Get setup command' symbol (circle with down arrow).<br>
+   https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_setup/MUO-RunIIAutumn18MiniAOD-00016<br>
+   https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_fragment/MUO-RunIIAutumn18MiniAOD-00016
 4. Copy-paste the `cmsDriver.py` the command line (in a `CMSSW` environment).
 5. You will find a configuration file called `<prep-id>.py`.

@@ -3,7 +3,7 @@ import os
 from fnmatch import fnmatch
 #if os.getenv('CMSSW_BASE'):
 #  import Utilities.General.cmssw_das_client as dasclient
-  
+
 def ensureDirectory(dirname):
   """Make directory if it does not exist."""
   if not os.path.exists(dirname):
@@ -28,7 +28,7 @@ def warning(string,**kwargs):
   title  = kwargs.get('title',"")
   if title: pre = "%s%s: "%(pre,title)
   string = "%s%s\033[0m"%(pre,string)
-  print string.replace('\n','\n'+' '*(len(pre)-18))
+  return string.replace('\n','\n'+' '*(len(pre)-18))
   
 
 def formatTag(tag):
