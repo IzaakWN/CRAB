@@ -5,10 +5,9 @@ Process `miniAOD` or `nanoAOD` files with `CRAB3`.
 #### Table of Contents  
 * [Installation](#installation)<br>
 * [Local run](#local-run)<br>
-* [Check output](#check-output)<br>
 * [Submit](#submit)<br>
-* [Notes](#notes)<br>
 * [Event generation](#event-generation)<br>
+* [Notes](#notes)<br>
 
 ## Installation
 
@@ -175,7 +174,7 @@ Produce the cards and gridpacks in series with [`generate_gridpacks.py`](generat
 ./generate_gridpacks.py cards/ScalarLQ_Single ScalarLQ_Single -m 1000 -p LAMBDA=0.1,1.0,1.5
 ```
 
-### Event generation
+### Local event generation
 Produce events with a gridpack with [`pset_GENSIM.py`](pset_GENSIM.py) as e.g.
 ```
 cmsRun pset_GENSIM.py nevents=100 gridpack=ScalarLQ_Single_M500_slc6_amd64_gcc630_CMSSW_9_3_16_tarball.tar.xz
