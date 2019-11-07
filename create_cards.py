@@ -11,8 +11,7 @@ import itertools
 from utils import formatTag, bold, error, warning, green
 parampattern   = re.compile(r"\$([a-zA-Z0-9.-]+)") #re.compile(r"\$(\w+)")
 defaultpattern = re.compile(r"(\$\{(\w+)=([^}]+)\})")
-
-
+cardpattern    = re.compile(r"(.+)(_[^_]+(?<!_card)(?<!_FKS_params)\.dat|_[^_]+_card\.dat|_FKS_params\.dat)$") # *_run_card.dat, *_custumizecards.dat, ...
 
 def main(args):
   
@@ -60,21 +59,39 @@ def main(args):
       makeCard(template,cardname,outdir,verbose=True,**kwargs)
   
 
+def getCards(carddir, sample):
+  """Find all cards of a given sample in a directory."""
+  cards = [ ]
+  for card in glob.glob("%s/%s_*.dat"%(carddir,sample)):
+    card = os.path.basename(card)
+    match = cardpattern.match(card)
+    if match and match.group(1)!=sample:
+      continue
+    cards.append(card)
+  return cards
+  
 def getSampleName(template):
   """Get the sample name from a card name,
   e.g. 'LQ_M500' for 'LQ_M500_proc_card.dat'."""
   template = os.path.basename(template)
   if 'template' in template:
     samplename = template[:template.index('template')].rstrip('_')
-  elif template.endswith('_card.dat') and template.count('_')>=2:
-    index = template.rindex('_',0,len(template)-len('_card.dat'))
-    samplename = template[:index]
-  elif template.count('_')>=1:
-    index = template.rindex('_')
-    samplename = template[:index]
   else:
-    samplename = template.rstrip('.dat')
-    print warning("getSampleName: Did not find sample name in '%s'!"%samplename)
+    match = cardpattern.match(template)
+    if match:
+      samplename = match.group(1)
+    else:
+      samplename = template.rstrip('.dat')
+      print warning("getSampleName: Did not find sample name in '%s'!"%samplename)
+  ###elif template.endswith('_card.dat') and template.count('_')>=2:
+  ###  index = template.rindex('_',0,len(template)-len('_card.dat'))
+  ###  samplename = template[:index]
+  ###elif template.count('_')>=1:
+  ###  index = template.rindex('_')
+  ###  samplename = template[:index]
+  ###else:
+  ###  samplename = template.rstrip('.dat')
+  ###  print warning("getSampleName: Did not find sample name in '%s'!"%samplename)
   return samplename
   
 def makeCardLabel(label,**params):
@@ -155,7 +172,7 @@ def makeCard(template, cardname, outdir=None, verbose=False, **params):
           for pattern, key, value in defaultpattern.findall(line):
               value = makeParamValue(key,params.get(key,value))
               line  = defaultpattern.sub(value,line)
-              print ">>>   L%d: replacing '%s' -> '%s'"%(i,pattern,value)
+              print ">>>   L%d: replacing '%s' -> '%s'"%(i,pattern,value)+("" if value in params else " (default)")
         lines.append(line)
     
     # WRITE
@@ -184,7 +201,7 @@ if __name__ == '__main__':
   parser.add_argument('-o', '--outdir',    type=str, action='store', default=None,
                                            help="output directory" )
   parser.add_argument('-p', '--param',     dest='params', default="",
-                      metavar="PARAMS",    help="single string of parameters separated by colons,"+\
+                      metavar='PARAMS',    help="single string of parameters separated by colons,"+\
                                                 "each with a list of values separated commas" )
   args = parser.parse_args()
   print ">>> "

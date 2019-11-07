@@ -4,11 +4,12 @@
 #   git clone git@github.com:cms-sw/genproductions.git genproductions
 #   cd genproductions/bin/MadGraph5_aMCatNLO/
 #   ./gridpack_generation.sh <process name without _proc_card.dat> <card dir>
-import os, re, glob
+import os, re, glob, shutil
 import itertools
 import subprocess
-from utils import formatTag, bold, error
-from create_cards import makeCardLabel, makeCardName, makeCard
+from utils import formatTag, bold, error, warning, ensureDirectory
+from create_cards import makeCardLabel, makeCardName, makeCard, getCards
+
 
 
 def main(args):
@@ -20,6 +21,8 @@ def main(args):
   masses     = args.masses
   params     = args.params
   tag        = args.tag
+  copy       = args.copy
+  remove     = not args.keep
   test       = args.test
   cmsswdir   = "/work/ineuteli/production/LQ_Legacy/CMSSW_10_2_16_patch1" # TODO: automatic or user-set
   genproddir = "genproductions/bin/MadGraph5_aMCatNLO"
@@ -86,18 +89,27 @@ def main(args):
     carddir    = os.path.relpath(carddir,workdir)
     os.chdir(workdir)
     for samplename in samplenames:
-      generateGridpack(carddir,samplename)
+      generateGridpack(carddir,samplename,remove=remove,copy=copy)
   else:
     carddir    = os.path.relpath(carddir,workdir)
     os.chdir(workdir)
-    generateGridpack(carddir,sample)
+    generateGridpack(carddir,sample,remove=remove,copy=copy)
   
 
-
-def generateGridpack(carddir,sample,**kwargs):
+def generateGridpack(carddir, sample, **kwargs):
   """Create a CRAB configuration and submit a given list of samples."""
   
-  cards = [os.path.basename(f) for f in glob.glob("%s/%s_*.dat"%(carddir,sample))]
+  cards  = getCards(carddir,sample) #[os.path.basename(f) for f in glob.glob("%s/%s_*.dat"%(carddir,sample))]
+  copy   = kwargs.get('copy',   False )
+  remove = kwargs.get('remove', True  )
+  
+  # COPY
+  if copy:
+    newdir = ensureDirectory("%s_InputCards"%sample)
+    print ">>> copying cards to '%s'..."%newdir
+    for card in cards:
+      shutil.copy(os.path.join(carddir,card),newdir)
+    carddir = newdir
   
   # PRINT
   print ">>> "
@@ -105,13 +117,30 @@ def generateGridpack(carddir,sample,**kwargs):
   #print ">>> year        = %s"%year
   print ">>> sample      = '%s'"%bold(sample)
   print ">>> cards       = '%s'"%"', '".join(c.replace(sample,'*') for c in cards)
-  #print ">>> carddir     = '%s'"%bold(carddir)
-  extraopts = ""#%()
-  command = './gridpack_generation.sh %s %s'%(sample,carddir)
-  command = command.rstrip()
-  print ">>> "+bold(command)
-  #subprocess.Popen(command, shell=True)
-  os.system(command)
+  print ">>> carddir     = '%s'"%bold(carddir)
+  
+  # CLEAN
+  if os.path.join(sample):
+    print ">>> "+warning("Directory '%s' already exists! Removing..."%sample)
+    rmcommand  = "rm -rf %s"%(sample)
+    print ">>> "+bold(rmcommand)
+    os.system(rmcommand)
+  
+  # GENERATE
+  extraopts  = ""#%()
+  gencommand = "./gridpack_generation.sh %s %s"%(sample,carddir)
+  gencommand = gencommand.rstrip()
+  print ">>> "+bold(gencommand)
+  os.system(gencommand)
+  
+  # REMOVE
+  if remove:
+    rmdirs = [sample,carddir] if copy else [sample]
+    for dir in rmdirs:
+      rmcommand  = "rm -rf %s"%(dir)
+      print ">>> "+bold(rmcommand)
+      os.system(rmcommand)
+  
   print ">>> "+'-'*100
   
 
@@ -123,10 +152,12 @@ if __name__ == '__main__':
                        metavar='CARDDIR',  help="directoy with cards" )
   parser.add_argument('sample',            type=str, action='store',
                        metavar='SAMPLE',   help="name of sample" )
+  parser.add_argument('-k', '--keep',      action='store_true', default=False,
+                                           help="do not remove the gridpack directory" )
   #parser.add_argument('-f', '--force',     action='store_true', default=False,
   #                                         help="submit jobs without asking confirmation" )
-  #parser.add_argument('-c', '--copy',      action='store_true', default=False,
-  #                                         help="copy cards into new directory in the same directory as gridpack_generation.sh" )
+  parser.add_argument('-c', '--copy',      action='store_true', default=False,
+                                           help="copy cards into new directory to avoid stowaway cards" )
   parser.add_argument('-y', '--year',      dest='years', choices=[2016,2017,2018], type=int, nargs='+', default=[2017], action='store',
                                            help="select year" )
   parser.add_argument('-m', '--mass',      dest='masses', type=int, nargs='+', default=[ ], action='store',
@@ -134,12 +165,12 @@ if __name__ == '__main__':
   parser.add_argument('-t', '--tag',       type=int, nargs='?', default=-1, const=1,
                                            help="tag" )
   parser.add_argument('-T', '--test',      type=int, nargs='?', default=-1, const=1,
-                      metavar="NJOBS",     help="submit test job(s)" )
+                      metavar='NJOBS',     help="submit test job(s)" )
   parser.add_argument('-n', '--cardlabel', type=str, action='store', default=None,
                                            help="card label replacing" )
   parser.add_argument('-p', '--param',     dest='params', default="",
-                      metavar="PARAMS",    help="single string of parameters separated by colons,"+\
-                                                "each with a list of values separated commas" )
+                      metavar='PARAMS',    help="single string of parameters separated by colons,"+\
+                                                "each with a list of values separated commas after an equal sign" )
   args = parser.parse_args()
   print ">>> "
   main(args)

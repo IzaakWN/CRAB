@@ -58,9 +58,9 @@
 #*********************************************************************
  T        = fixed_ren_scale  ! if .true. use fixed ren scale
  T        = fixed_fac_scale  ! if .true. use fixed fac scale
- 2000      = scale            ! fixed ren scale
- 2000      = dsqrt_q2fact1    ! fixed fact scale for pdf1
- 2000      = dsqrt_q2fact2    ! fixed fact scale for pdf2
+ $MASS     = scale            ! fixed ren scale
+ $MASS     = dsqrt_q2fact1    ! fixed fact scale for pdf1
+ $MASS     = dsqrt_q2fact2    ! fixed fact scale for pdf2
  1        = scalefact        ! scale factor for event-by-event scales
 #*********************************************************************
 # Matching - Warning! ickkw > 1 is still beta
