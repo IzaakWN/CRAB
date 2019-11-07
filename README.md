@@ -97,7 +97,7 @@ cmsRun pset_nanoAODv5.py
 ```
 
 
-## Check output
+### Check output
 
 Check the content of a `miniAOD` file with
 ```
