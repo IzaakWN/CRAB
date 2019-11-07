@@ -4,10 +4,16 @@ Process `miniAOD` or `nanoAOD` files with `CRAB3`.
 
 #### Table of Contents  
 * [Installation](#installation)<br>
-* [Local run](#local-run)<br>
-* [Submit](#submit)<br>
+  * [DeepTau2017v2p1](#deeptau2017v2p1)
+  * [Environment setup](#environment-setup)
+* [Event processing](#event-processing)<br>
+  * [Local run](#local-run)<br>
+  * [Crab submission](#crab-submission)<br>
 * [Event generation](#event-generation)<br>
+  * [MadGraph Gridpack generation](#madgraph-gridpack-generation)
+  * [Local event generation](#local-event-generation)
 * [Notes](#notes)<br>
+
 
 ## Installation
 
@@ -78,7 +84,9 @@ cd ../..
 ```
 
 
-## Local run
+## Event processing
+
+### Local run
 
 Get some files with e.g.
 ```
@@ -110,7 +118,7 @@ or use as an example (see [this TWiki page](https://twiki.cern.ch/twiki/bin/view
 
 
 
-## Submit
+### CRAB submission
 
 Collect your favorite samples in the respective python file, sorted in a dictionary per year:
 ```
