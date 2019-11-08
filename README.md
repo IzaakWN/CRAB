@@ -1,6 +1,6 @@
 # CRAB
 
-Process `miniAOD` or `nanoAOD` files with `CRAB3`.
+Generate events or process `miniAOD` files with `CRAB3`.
 
 #### Table of Contents  
 * [Installation](#Installation)<br>
@@ -17,6 +17,7 @@ Process `miniAOD` or `nanoAOD` files with `CRAB3`.
   * [NanoAOD](#NanoAOD)
   * [Samples](#Samples)
   * [PSet fragments](#PSet-fragments)
+
 
 ## Installation
 
