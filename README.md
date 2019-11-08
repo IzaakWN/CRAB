@@ -3,16 +3,16 @@
 Process `miniAOD` or `nanoAOD` files with `CRAB3`.
 
 #### Table of Contents  
-* [Installation](#installation)<br>
-  * [DeepTau2017v2p1](#deeptau2017v2p1)
+* [Installation](#Installation)<br>
+  * [DeepTau2017v2p1](#DeepTau2017v2p1)
   * [Environment setup](#environment-setup)
 * [Event processing](#event-processing)<br>
   * [Local run](#local-run)<br>
-  * [CRAB submission](#crab-submission)<br>
+  * [CRAB submission](#CRAB-submission)<br>
 * [Event generation](#event-generation)<br>
   * [MadGraph gridpack generation](#madgraph-gridpack-generation)
   * [Local event generation](#local-event-generation)
-* [Notes](#notes)<br>
+* [Notes](#Notes)<br>
   * [CRAB3](#CRAB3)
   * [NanoAOD](#NanoAOD)
   * [Samples](#Samples)
