@@ -8,12 +8,15 @@ Process `miniAOD` or `nanoAOD` files with `CRAB3`.
   * [Environment setup](#environment-setup)
 * [Event processing](#event-processing)<br>
   * [Local run](#local-run)<br>
-  * [Crab submission](#crab-submission)<br>
+  * [CRAB submission](#crab-submission)<br>
 * [Event generation](#event-generation)<br>
-  * [MadGraph Gridpack generation](#madgraph-gridpack-generation)
+  * [MadGraph gridpack generation](#madgraph-gridpack-generation)
   * [Local event generation](#local-event-generation)
 * [Notes](#notes)<br>
-
+  * [CRAB3](#CRAB3)
+  * [NanoAOD](#NanoAOD)
+  * [Samples](#Samples)
+  * [PSet fragments](#PSet-fragments)
 
 ## Installation
 
@@ -162,7 +165,7 @@ dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
 
 ## Event generation
 
-### MadGraph Gridpack generation
+### MadGraph gridpack generation
 Before you can generate MadGraph events with CMSSW, it's useful to create a gridpack, as described [here](https://twiki.cern.ch/twiki/bin/viewauth/CMS/QuickGuideMadGraph5aMCatNLO), or install
 ```
 git clone git@github.com:cms-sw/genproductions.git genproductions
@@ -219,7 +222,7 @@ More [notes](https://www.evernote.com/l/Ac8PKYGpaJxJArj4eng5ed95_wvpzwSNTgc).
 * **2018**: [list](samples_2018.cfg), [DAS](https://cmsweb.cern.ch/das/request?view=plain&limit=50&instance=prod%2Fglobal&input=%2F*%2FRunIIAutumn18NanoAODv4-Nano14Dec2018*%2FNANOAODSIM), [notes](https://www.evernote.com/l/Ac9yyi7wtg9LaYgxOIz11jFyzLV0ztkemtE)
 
 
-### PSet fragment
+### PSet fragments
 
 Get a fragment of a `PSet` configuration file:
 1. Go to [MCM](https://cms-pdmv.cern.ch/mcm/).
