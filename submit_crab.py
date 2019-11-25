@@ -278,11 +278,12 @@ def createDatasetOutTag(dataset,tag='',datatier=None,year=None,version=""):
   outtag   = outtags[1]
   outtag   = outtag.replace(getUsernameFromSiteDB()+'-',"")
   outtag   = hashpattern.sub("",outtag)
+  dtype    = 'data' if '/Run201' in dataset else 'mc'
   if datatier=='nanoAOD':
     if 'miniaod' in outtag.lower():
       newtier = 'NanoAOD'+version
       outtag  = minipattern.sub(newtier,outtag)
-    globaltag = globaltags['nanoAOD'].get(year,False)
+    globaltag = globaltags[dtype]['nanoAOD'].get(year,False)
     if globaltag:
       outtag = outtag[:outtag.index(newtier)+len(newtier)]+'_'+globaltag
   if tag and not outtag.endswith(tag):

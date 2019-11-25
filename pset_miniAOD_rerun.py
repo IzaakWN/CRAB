@@ -33,7 +33,7 @@ options.register('nThreads', nThreads, mytype=VarParsing.varType.int)
 options.parseArguments()
 year     = options.year
 nThreads = options.nThreads
-globaltag = globaltags['miniAOD'].get(year,'auto:phase1_2017_realistic')
+globaltag = globaltags['mc']['miniAOD'].get(year,'auto:phase1_2017_realistic')
 if index>0:
   outfile = "file:miniAOD_rerun_%s%s_%s.root"%(year,formatTag(sample),index)
 else:

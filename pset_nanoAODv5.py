@@ -13,40 +13,49 @@ from eras import globaltags, eras
 # DEFAULTS
 sample     = "" #"test"
 index      = -1
-year       = 2018
-maxEvents  = 100
+year       = 2017
+maxEvents  = -1
 nThreads   = 1
 director   = "file:root://xrootd-cms.infn.it/"
 infiles    = [
   #"file:miniAOD_rerun_%s_%s_%s.root"%(sample,year,index)
-  "file:input/VLQ-p_M1100_2018_rerun.root",
+  #"file:input/VLQ-p_M1100_2018_rerun.root",
+  director+'/store/mc/RunIISummer16MiniAODv3/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/120000/ACDA5D95-3EDF-E811-AC6F-842B2B6AEE8B.root',
+  director+'/store/mc/RunIIFall17MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/70000/0256D125-5A44-E811-8C69-44A842CFD64D.root',
+  director+"/store/mc/RunIIAutumn18MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/100000/08540B6C-AA39-3F49-8FFE-8771AD2A8885.root",
+  #director+'/store/data/Run2018A/SingleMuon/MINIAOD/17Sep2018-v2/00000/11697BCC-C4AB-204B-91A9-87F952F9F2C6.root',
+  #director+'/store/data/Run2018B/SingleMuon/MINIAOD/17Sep2018-v1/100000/7FA66CD1-3158-F94A-A1E0-27BECABAC34A.root',
+  #director+'/store/data/Run2018C/SingleMuon/MINIAOD/17Sep2018-v1/110000/8DB2B7A5-F627-2144-8F8F-180A8DA0E90D.root',
+  #director+'/store/data/Run2018D/SingleMuon/MINIAOD/PromptReco-v2/000/320/569/00000/3C8C28E7-1A96-E811-BA8D-02163E012DD8.root',
 ]
+dtype      = 'mc' #'data' #if any('/store/data/' in f for f in infiles) else mc
 nanoAOD    = '14Dec2018'
 
 # USER OPTIONS
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
-options.register('year',     year,     mytype=VarParsing.varType.int)
-options.register('nThreads', nThreads, mytype=VarParsing.varType.int)
+options.register('year',      year,      mytype=VarParsing.varType.int)
+options.register('dtype',     dtype,     mytype=VarParsing.varType.string)
+options.register('nThreads',  nThreads,  mytype=VarParsing.varType.int)
+options.register('events',    maxEvents, mytype=VarParsing.varType.int)
 options.parseArguments()
-year     = options.year
-nThreads = options.nThreads
-###import sys
-###args = sys.argv
-####assert len(args)>=4, "Only %s arguments given, please provide 4!"%(len(args))
-###if len(args)>=4:
-###  sample = args[2]
-###  index  = args[3]
-globaltag = globaltags['nanoAOD'].get(year,'auto:phase1_2017_realistic')
+year      = options.year
+dtype     = dtype
+nThreads  = options.nThreads
+maxEvents = options.events
+globaltag = globaltags[dtype]['nanoAOD'].get(year,'auto:phase1_2017_realistic')
 era = eras['nanoAOD'].get(year,None)
 if index>0:
   outfile = "file:nanoAOD_%s%s_%s.root"%(year,formatTag(sample),index)
 else:
   outfile = "file:nanoAOD_%s%s.root"%(year,formatTag(sample))
+if   year==2016: infiles = filter(lambda f: 'RunIISummer16' in f or '/Run2016' in f or '_2016_' in f,infiles)
+elif year==2017: infiles = filter(lambda f: 'RunIIFall17'   in f or '/Run2017' in f or '_2017_' in f,infiles)
+elif year==2018: infiles = filter(lambda f: 'RunIIAutumn'   in f or '/Run2018' in f or '_2018_' in f,infiles)
 
 print ">>> sample    = '%s'"%sample
 print ">>> index     = %s"%index
-print ">>> year      = '%s"%year
+print ">>> year      = %s"%year
 print ">>> maxEvents = %s"%maxEvents
 print ">>> globaltag = '%s'"%globaltag
 print ">>> infiles   = %s"%infiles
@@ -60,9 +69,11 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('SimGeneral.MixingModule.mixNoPU_cfi')
+if dtype=='mc':
+  process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
+#process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('PhysicsTools.NanoAOD.nano_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -87,55 +98,81 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # OUTPUT
-process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
-  compressionAlgorithm = cms.untracked.string('LZMA'),
-  compressionLevel = cms.untracked.int32(9),
-  dataset = cms.untracked.PSet(
-    dataTier = cms.untracked.string('NANOAODSIM'),
-    filterName = cms.untracked.string('')
-  ),
-  fileName = cms.untracked.string(
-    outfile
-  ),
-  outputCommands = process.NANOAODSIMEventContent.outputCommands,
-  fakeNameForCrab = cms.untracked.bool(True)
+if dtype=='mc':
+  process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
+    compressionAlgorithm = cms.untracked.string('LZMA'),
+    compressionLevel = cms.untracked.int32(9),
+    dataset = cms.untracked.PSet(
+      dataTier = cms.untracked.string('NANOAODSIM'),
+      filterName = cms.untracked.string('')
+    ),
+    fileName = cms.untracked.string(
+      outfile
+    ),
+    outputCommands = process.NANOAODSIMEventContent.outputCommands,
+    fakeNameForCrab = cms.untracked.bool(True)
+  )
+  ###process.NANOEDMAODSIMoutput = cms.OutputModule("PoolOutputModule",
+  ###    compressionAlgorithm = cms.untracked.string('LZMA'),
+  ###    compressionLevel = cms.untracked.int32(9),
+  ###    dataset = cms.untracked.PSet(
+  ###        dataTier = cms.untracked.string('NANOAODSIM'),
+  ###        filterName = cms.untracked.string('')
+  ###    ),
+  ###    fileName = cms.untracked.string('file:EXO-RunIIAutumn18NanoAODv4-00116.root'),
+  ###    outputCommands = process.NANOAODSIMEventContent.outputCommands
+  ###)
+else:
+  process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
+    compressionAlgorithm = cms.untracked.string('LZMA'),
+    compressionLevel = cms.untracked.int32(9),
+    dataset = cms.untracked.PSet(
+        dataTier = cms.untracked.string('NANOAOD'),
+        filterName = cms.untracked.string('')
+    ),
+    fileName = cms.untracked.string(
+      outfile
+    ),
+    outputCommands = process.NANOAODEventContent.outputCommands
 )
 
-###process.NANOEDMAODSIMoutput = cms.OutputModule("PoolOutputModule",
-###    compressionAlgorithm = cms.untracked.string('LZMA'),
-###    compressionLevel = cms.untracked.int32(9),
-###    dataset = cms.untracked.PSet(
-###        dataTier = cms.untracked.string('NANOAODSIM'),
-###        filterName = cms.untracked.string('')
-###    ),
-###    fileName = cms.untracked.string('file:EXO-RunIIAutumn18NanoAODv4-00116.root'),
-###    outputCommands = process.NANOAODSIMEventContent.outputCommands
-###)
-
 # Path and EndPath definitions
-process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
-process.endjob_step = cms.EndPath(process.endOfProcess)
-process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
-#process.NANOEDMAODSIMoutput_step = cms.EndPath(process.NANOEDMAODSIMoutput)
+if dtype=='mc':
+  process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
+  process.endjob_step = cms.EndPath(process.endOfProcess)
+  process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
+  #process.NANOEDMAODSIMoutput_step = cms.EndPath(process.NANOEDMAODSIMoutput)
+  output_step = process.NANOAODSIMoutput_step
+else:
+  process.nanoAOD_step = cms.Path(process.nanoSequence)
+  process.endjob_step = cms.EndPath(process.endOfProcess)
+  process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
+  output_step = process.NANOAODoutput_step
 
 # SCHEDULE
 #process.schedule = cms.Schedule(process.nanoAOD_step,process.endjob_step,process.NANOEDMAODSIMoutput_step)
-process.schedule = cms.Schedule(process.nanoAOD_step,process.endjob_step,process.NANOAODSIMoutput_step)
+process.schedule = cms.Schedule(process.nanoAOD_step,process.endjob_step,output_step)
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
+if dtype=='mc':
+  process.particleLevelSequence.remove(process.genParticles2HepMCHiggsVtx)
+  process.particleLevelSequence.remove(process.rivetProducerHTXS)
+  process.particleLevelTables.remove(process.HTXSCategoryTable)
 
 # Setup FWK for multithreaded
 process.options.numberOfThreads = cms.untracked.uint32(nThreads)
 process.options.numberOfStreams = cms.untracked.uint32(0)
 
 # PROCESS CUSTOMIZATION
-from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 from Configuration.DataProcessing.Utils import addMonitoring
-process = nanoAOD_customizeMC(process)
+if dtype=='mc':
+  from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC as nanoAOD_customize
+else:
+  from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData as nanoAOD_customize
+process = nanoAOD_customize(process)
 process = addMonitoring(process)
 
 # COMMAND LINE CUSTOMIZATION
-process.particleLevelSequence.remove(process.genParticles2HepMCHiggsVtx);process.particleLevelSequence.remove(process.rivetProducerHTXS);process.particleLevelTables.remove(process.HTXSCategoryTable)
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process) # early deletion of temporary data products to reduce peak memory need
 
