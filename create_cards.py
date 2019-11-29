@@ -5,13 +5,16 @@
 # Source:
 #   git clone git@github.com:cms-sw/genproductions.git genproductions
 #   cd genproductions/bin/MadGraph5_aMCatNLO/
-#   ./gridpack_generation.sh <process name without _proc_card.dat> <card dir>
-import os, re, glob
+# Examples
+#   ./create_cards.py cards/ScalarLQ_Single/*template*dat -m 800 1100 1500 -p 'LAMBDA=0.5,1.0,1.5,2.0,2.5'
+import os, re, glob, math
 import itertools
 from utils import formatTag, bold, error, warning, green
 parampattern   = re.compile(r"\$([a-zA-Z0-9.-]+)") #re.compile(r"\$(\w+)")
 defaultpattern = re.compile(r"(\$\{(\w+)=([^}]+)\})")
 cardpattern    = re.compile(r"(.+)(_[^_]+(?<!_card)(?<!_FKS_params)\.dat|_[^_]+_card\.dat|_FKS_params\.dat)$") # *_run_card.dat, *_custumizecards.dat, ...
+
+
 
 def main(args):
   
@@ -49,7 +52,7 @@ def main(args):
   print ">>> params      = %s"%', '.join("%s: %s"%(bold(k),l) for k, l in params)
   print ">>> "+'='*90
   
-  # SUBMIT
+  # CREATE CARDS
   for values in points:
     kwargs = { }
     for key, value in zip(keys,values):
@@ -58,6 +61,7 @@ def main(args):
       cardname = makeCardName(template,cardlabel,outdir,**kwargs)
       makeCard(template,cardname,outdir,verbose=True,**kwargs)
   
+
 
 def getCards(carddir, sample):
   """Find all cards of a given sample in a directory."""
@@ -70,9 +74,10 @@ def getCards(carddir, sample):
     cards.append(card)
   return cards
   
+
+
 def getSampleName(template):
-  """Get the sample name from a card name,
-  e.g. 'LQ_M500' for 'LQ_M500_proc_card.dat'."""
+  """Get the sample name from a card name, e.g. 'LQ_M500' for 'LQ_M500_proc_card.dat'."""
   template = os.path.basename(template)
   if 'template' in template:
     samplename = template[:template.index('template')].rstrip('_')
@@ -94,6 +99,8 @@ def getSampleName(template):
   ###  print warning("getSampleName: Did not find sample name in '%s'!"%samplename)
   return samplename
   
+
+
 def makeCardLabel(label,**params):
   """Make card label from given label template with placeholders."""
   for key in parampattern.findall(label):
@@ -106,6 +113,8 @@ def makeCardLabel(label,**params):
   #assert 'template' in template, "Template '%s' does not contain 'template'"%(template)
   return label
   
+
+
 def makeCardName(template,cardlabel,outdir=None,**params):
     """Make card name from given template and label.
     Replace placeholders in label with given parameters, e.g. M$MASS
@@ -128,6 +137,8 @@ def makeCardName(template,cardlabel,outdir=None,**params):
       cardname = os.path.join(outdir,os.path.basename(cardname))
     return cardname
     
+
+
 def makeCard(template, cardname, outdir=None, verbose=False, **params):
     """Replace placeholders in template with values."""
     assert os.path.isfile(template), error("Input card '%s' does not exist!"%template)
@@ -145,6 +156,13 @@ def makeCard(template, cardname, outdir=None, verbose=False, **params):
         params['SAMPLE'] = getSampleName(template)
       return makeCardLabel(value,**params)
     
+    # FIX BWCUTOFF for high lambda LQ samples
+    lambd = float(params.get('LAMBDA',0))
+    mass  = float(params.get('MASS',0))
+    if 'LQ' in template and 'BWCUTOFF' not in params and lambd>=1.5 and mass>0:
+      params['BWCUTOFF'] = computeBWCutoff(template,mass,lambd)
+      print ">>> computed bwcutoff=%s for mass=%s, lambda=%s"%(params['BWCUTOFF'],mass,lambd)
+    
     # PRINT
     ###print ">>> "+'-'*85
     ###print ">>> template    = %s"%template
@@ -154,25 +172,26 @@ def makeCard(template, cardname, outdir=None, verbose=False, **params):
     
     # REPLACE
     if verbose:
-      print ">>> makeCard: replacing in '%s'..."%(green(template))
+      print ">>> replacing in '%s'..."%(green(template))
     else:
-      print ">>> makeCard: writing '%s'..."%(green(os.path.basename(cardname)))
+      print ">>> writing '%s'..."%(green(os.path.basename(cardname)))
     lines = [ ]
     with open(template,'r') as file:
       for i, line in enumerate(file.readlines(),1):
+        linenum = "L%d:"%i
         if '$' in line:
           for key in parampattern.findall(line):
             if key in params:
               value   = makeParamValue(key,params[key])
               pattern = '$'+key
               line    = line.replace(pattern,value)
-              print ">>>   L%d: replacing '%s' -> '%s'"%(i,pattern,value)
+              print ">>>   %-4s replacing '%s' -> '%s'"%(linenum,pattern,value)
             else:
-              print ">>>   L%d: Found no given value for '$%s'"%(i,key)
+              print ">>>   %-4s Found no given value for '$%s'"%(linenum,key)
           for pattern, key, value in defaultpattern.findall(line):
               value = makeParamValue(key,params.get(key,value))
               line  = defaultpattern.sub(value,line)
-              print ">>>   L%d: replacing '%s' -> '%s'"%(i,pattern,value)+("" if value in params else " (default)")
+              print ">>>   %-4s replacing '%s' -> '%s'"%(linenum,pattern,value)+("" if value in params else " (default)")
         lines.append(line)
     
     # WRITE
@@ -180,9 +199,26 @@ def makeCard(template, cardname, outdir=None, verbose=False, **params):
       for line in lines:
         file.write(line)
     if verbose:
-      print '>>> makeCard: written file "%s"'%(green(cardname))
+      print '>>> written file "%s"'%(green(cardname))
       print ">>> "+'-'*85
     
+
+
+def computeBWCutoff(model,mass,lambd,default=15,Gamma=0):
+  """Ensure the BW cutoff is not too large."""
+  if not Gamma:
+    if 'scalar' in model.lower():
+      Gamma = lambd**2*mass/(16*math.pi)
+    else:
+      Gamma = lambd**2*mass/(24*math.pi)
+  mcut = default
+  mmin = mass-mcut*Gamma # window cut
+  #print ">>> mass=%s, lamda=%s, Gamma=%s, mmin=%s"%(mass,lambd,Gamma,mmin)
+  flat = 0.51*mass # maximum window cut, flat in lambda
+  if mmin<flat:
+    mcut = max(8,round(2*flat/Gamma))/2.0
+  return mcut
+  
 
 
 if __name__ == '__main__':

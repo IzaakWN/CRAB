@@ -4,6 +4,9 @@
 #   git clone git@github.com:cms-sw/genproductions.git genproductions
 #   cd genproductions/bin/MadGraph5_aMCatNLO/
 #   ./gridpack_generation.sh <process name without _proc_card.dat> <card dir>
+# Examples
+#   ./generate_gridpacks.py cards/ScalarLQ_Pair ScalarLQ_Pair -m 800 1100 1500 -p 'LAMBDA=1.5,2.0,2.5'
+#   ./generate_gridpacks.py cards/VectorLQ_Single VectorLQ_Single -m 1000 1500 2000 -p 'LAMBDA=1.5,2.0,2.5:KAPPA=0.0,1.0'
 import os, re, glob, shutil
 import itertools
 import subprocess
