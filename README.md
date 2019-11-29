@@ -225,7 +225,7 @@ More [notes](https://www.evernote.com/l/Ac8PKYGpaJxJArj4eng5ed95_wvpzwSNTgc).
 
 ### PSet fragments
 
-To get a fragment of a `PSet` configuration file with `cmsDriver.py` is explained [on the NanoAOD Workbook](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Running_on_various_datasets_from).
+To get a fragment of a `PSet` configuration file with `cmsDriver.py` is explained [in the NanoAOD Workbook](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Running_on_various_datasets_from).
 ```
 cmsDriver.py myNanoProdMc -s NANO --mc --eventcontent NANOAODSIM --datatier NANOAODSIM --no_exec --conditions MyGlobalTag --era MyEraModifiers
 cmsDriver.py myNanoProdData -s NANO --data --eventcontent NANOAOD --datatier NANOAOD --no_exec --conditions MyGlobalTag --era MyEraModifiers

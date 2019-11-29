@@ -66,7 +66,7 @@ SERESULTDIR="$SE_HOME/samples/${SAMPLE}_GENSIM"
 
 ##### MONITORING/DEBUG INFORMATION #######################################################
 
-mkdir -p /work/ineuteli/production/LQ_Legacy/
+mkdir -p /work/ineuteli/production/LQ_Legacy/submit_sge
 #$ -j y
 #$ -e /work/ineuteli/production/LQ_Legacy/submit_sge/
 #$ -o /work/ineuteli/production/LQ_Legacy/submit_sge/
@@ -108,12 +108,12 @@ if [ ! -d $SERESULTDIR ]; then
   peval "gfal-mkdir -p $GFAL/$SERESULTDIR" # always before cmsenv!
   TRY=0
   printf ">>> checking mkdir success..."
-  while [ ! -d $SERESULTDIR -a $TRY -lt 15 ]; do
+  while [ ! -d $SERESULTDIR -a $TRY -lt 20 ]; do
     printf "."; sleep 4; TRY=$((TRY+1))
   done; echo
   if [ ! -d $SERESULTDIR ]; then
-     echo "ERROR: Failed to create resultdir on the SE ($SERESULTDIR)! Aborting..." >&2
-     exit 1
+     echo "ERROR: Failed to create resultdir on the SE ($SERESULTDIR)! Continuing anyway..." >&2
+     #exit 1
   fi
 fi
 

@@ -1,7 +1,10 @@
 #! /usr/bin/env python
 # Author: Izaak Neutelings (November, 2019)
-# uberftp t3se01.psi.ch 'mkdir /pnfs/psi.ch/cms/trivcat/store/user/ineuteli/samples/LowMassDiTau_madgraph'
-# for i in `seq 1 50`; do ls /pnfs/psi.ch/cms/trivcat/store/user/ineuteli/samples/SLQ-s_M-1000_MG*_GENSIM/*_$i.root; done
+# grep -l Aborting submit_sge/Scalar*
+# for d in $SAMPLES/Scalar*M1*GENSIM; do
+#   I=""; for i in `seq 1 4`; do [ ! -e $d/GENSIM_$i.root ] && I+="$i "; done;
+#   [[ $I ]] && echo "./submit_sge.py -g gridpacks/$(basename $d | sed 's/_GENSIM//')_slc6_amd64_gcc630_CMSSW_9_3_16_tarball.tar.xz -N 5000 -i $I";
+# done
 import os, sys
 import subprocess
 import time
@@ -16,7 +19,7 @@ parser.add_argument('-m', '--mock-sub', dest="submit", default=True, action='sto
                                         help="do not submit job to batch (mock submit)")
 parser.add_argument('-s', '--sample',   dest="samples", nargs='+', default=[ ], action='store',
                     metavar="SAMPLE",   help="list of signals to get output for" )
-parser.add_argument('-N', '--nevents',  default=10000, action='store',
+parser.add_argument('-N', '--nevents',  default=5000, action='store',
                                         help="number of event to be generated in each job")
 parser.add_argument('-c', '--ncores',   type=int, default=2, action='store',
                                         help="number of core in each job")
