@@ -67,7 +67,6 @@ def main():
   elif args.masses and args.prods:
     for prod in args.prods:
       kappas = [''] if 'SLQ' in prod else args.kappas
-      print kappas
       model  = 'Scalar' if 'SLQ' in prod else 'Vector'
       prod   = 'NonRes' if '-t' in prod else 'Pair' if '-p' in prod else 'Single'
       sample = "%sLQ_%s"%(model,prod)
@@ -104,6 +103,9 @@ def main():
 
 
 def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
+  """Loop over GENSIM events and save custom trees."""
+  
+  lqids = [46] if isPythia else [9000002,9000006]
   
   print ">>>   loading files..."
   events  = Events(infiles)
@@ -117,38 +119,43 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   tree_assoc  = TTree('assoc', 'assoc')
   
   # EVENT
-  tree_event.addBranch('nb',       'i')
-  tree_event.addBranch('nbgen',    'i')
-  tree_event.addBranch('ntgen',    'i')
-  tree_event.addBranch('njet',     'i')
-  tree_event.addBranch('nlepton',  'i')
-  tree_event.addBranch('ntau',     'i')
-  tree_event.addBranch('nnu',      'i')
-  tree_event.addBranch('nlq',      'i')
-  tree_event.addBranch('met',      'f')
-  tree_event.addBranch('jpt1',     'f')
-  tree_event.addBranch('jpt2',     'f')
-  tree_event.addBranch('sumjet',   'f')
-  tree_event.addBranch('dphi_jj',  'f')
-  tree_event.addBranch('deta_jj',  'f')
-  tree_event.addBranch('dr_jj',    'f')
-  tree_event.addBranch('ncentral', 'i')
-  tree_event.addBranch('mjj',      'f')
-  tree_event.addBranch('weight',   'f')
+  tree_event.addBranch('nb',          'i')
+  tree_event.addBranch('nbgen',       'i')
+  tree_event.addBranch('ntgen',       'i')
+  tree_event.addBranch('njet',        'i')
+  tree_event.addBranch('nlepton',     'i')
+  tree_event.addBranch('ntau',        'i')
+  tree_event.addBranch('nnu',         'i')
+  tree_event.addBranch('nlq',         'i')
+  tree_event.addBranch('ntau_assoc',  'i')
+  tree_event.addBranch('ntau_decay',  'i')
+  tree_event.addBranch('nbgen_decay', 'i')
+  tree_event.addBranch('met',         'f')
+  tree_event.addBranch('jpt1',        'f')
+  tree_event.addBranch('jpt2',        'f')
+  tree_event.addBranch('sumjet',      'f')
+  tree_event.addBranch('dphi_jj',     'f')
+  tree_event.addBranch('deta_jj',     'f')
+  tree_event.addBranch('dr_jj',       'f')
+  tree_event.addBranch('ncentral',    'i')
+  tree_event.addBranch('mjj',         'f')
+  tree_event.addBranch('st',          'f') # scalar sum pT
+  tree_event.addBranch('st_met',      'f') # scalar sum pT with MET
+  tree_event.addBranch('weight',      'f')
   
   # LQ DECAY
-  tree_mother.addBranch('pid',     'f')
-  tree_mother.addBranch('pt',      'f')
-  tree_mother.addBranch('eta',     'f')
-  tree_mother.addBranch('phi',     'f')
-  tree_mother.addBranch('mass',    'f')
-  tree_mother.addBranch('inv',     'f')
-  tree_mother.addBranch('ndau',    'i')
-  tree_mother.addBranch('dau',     'i')
-  tree_mother.addBranch('dphi_ll', 'f')
-  tree_mother.addBranch('deta_ll', 'f')
-  tree_mother.addBranch('dr_ll',   'f')
-  tree_mother.addBranch('weight',  'f')
+  tree_mother.addBranch('pid',        'f')
+  tree_mother.addBranch('pt',         'f')
+  tree_mother.addBranch('eta',        'f')
+  tree_mother.addBranch('phi',        'f')
+  tree_mother.addBranch('mass',       'f')
+  tree_mother.addBranch('inv',        'f')
+  tree_mother.addBranch('ndau',       'i')
+  tree_mother.addBranch('dau',        'i')
+  tree_mother.addBranch('dphi_ll',    'f')
+  tree_mother.addBranch('deta_ll',    'f')
+  tree_mother.addBranch('dr_ll',      'f')
+  tree_mother.addBranch('weight',     'f')
   
   # FROM LQ DECAY
   tree_decay.addBranch('pid',         'i')
@@ -162,28 +169,25 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   tree_decay.addBranch('weight',      'f')
   
   # NOT FROM LQ DECAY (ASSOCIATED)
-  tree_assoc.addBranch('pid',    'i')
-  tree_assoc.addBranch('pt',     'f')
-  tree_assoc.addBranch('ptvis',  'f')
-  tree_assoc.addBranch('eta',    'f')
-  tree_assoc.addBranch('phi',    'f')
-  tree_assoc.addBranch('weight', 'f')
+  tree_assoc.addBranch('pid',         'i')
+  tree_assoc.addBranch('moth',        'i')
+  tree_assoc.addBranch('pt',          'f')
+  tree_assoc.addBranch('ptvis',       'f')
+  tree_assoc.addBranch('eta',         'f')
+  tree_assoc.addBranch('phi',         'f')
+  tree_assoc.addBranch('weight',      'f')
   
-  # JETS'
-  tree_jet.addBranch('pt',     'f')
-  tree_jet.addBranch('eta',    'f')
-  tree_jet.addBranch('phi',    'f')
-  tree_jet.addBranch('weight', 'f')
+  # JETS
+  tree_jet.addBranch('pt',            'f')
+  tree_jet.addBranch('eta',           'f')
+  tree_jet.addBranch('phi',           'f')
+  tree_jet.addBranch('weight',        'f')
   
   hist_LQ_decay = TH1F("LQ_decay","LQ decay",60,-30,30)
-  handle        = Handle('std::vector<reco::GenParticle>')
-  label         = 'genParticles'
-  handle_jets   = Handle('std::vector<reco::GenJet>')
-  label_jets    = 'ak4GenJets'
-  handle_met    = Handle('vector<reco::GenMET>')
-  label_met     = 'genMetTrue'
-  handle_weight = Handle('GenEventInfoProduct')
-  label_weight  = 'generator'
+  handle_gps,    label_gps    = Handle('std::vector<reco::GenParticle>'), 'genParticles'
+  handle_jets,   label_jets   = Handle('std::vector<reco::GenJet>'), 'ak4GenJets'
+  handle_met,    label_met    = Handle('vector<reco::GenMET>'), 'genMetTrue'
+  handle_weight, label_weight = Handle('GenEventInfoProduct'), 'generator'
   
   evtid = 0
   sec_per_evt = 0.016 # seconds per event
@@ -194,15 +198,14 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   
   # LOOP OVER EVENTS
   for event in events:
-      
+      #print '='*30
       #print evtid
       if Nmax>0 and evtid>=Nmax: break
       if evtid>0 and evtid%step==0: print ">>>     processed %4s/%d events, ETA %s"%(evtid,Ntot,ETA(start_proc,evtid+1,Ntot))
-      
       evtid += 1
       
-      event.getByLabel(label,handle)
-      gps = handle.product()
+      event.getByLabel(label_gps,handle_gps)
+      gps = handle_gps.product()
       
       event.getByLabel(label_jets,handle_jets)
       jets = handle_jets.product()
@@ -214,16 +217,10 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
       gweight = handle_weight.product()
       weight = gweight.weight()
       
-      lqid   = 9000006
-      lqid_2 = 9000002
-      
-      if isPythia:
-        lqid = 42
-      
       # GEN PARTICLES
       #gps_mother = [p for p in gps if isFinal(p) and abs(p.pdgId()) in [42]]
-      gps_final  = [p for p in gps if isFinal(p) and abs(p.pdgId()) in [5,6,15,16,lqid,lqid_2]]
-      gps_mother = [p for p in gps_final if abs(p.pdgId()) in [lqid,lqid_2]]
+      gps_final  = [p for p in gps if isFinal(p) and abs(p.pdgId()) in [5,6,15,16]+lqids]
+      gps_mother = [p for p in gps_final if abs(p.pdgId()) in lqids]
       gps_b      = [p for p in gps_final if abs(p.pdgId())==5 and p.status()==71 and p.pt()>20 and abs(p.eta())<2.5]
       gps_bgen   = [p for p in gps_final if abs(p.pdgId())==5 and p.status()==71]
       gps_tgen   = [p for p in gps_final if abs(p.pdgId())==6] #[-1:]
@@ -303,7 +300,6 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
           tree_event.mjj[0]     = -1
       
       tree_event.weight[0] = weight
-      tree_event.Fill()
       
       #print 'len, gps_mother = ', len(gps_mother)
       #if len(gps_mother)==1:
@@ -314,6 +310,7 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
       #    print '2 (ndaughter, daughter 1/2 pdgid) =', gps_mother[1].numberOfDaughters(), gps_mother[1].daughter(0).pdgId(), gps_mother[1].daughter(1).pdgId(), '(pdgId, status, pt, eta, phi) = ', gps_mother[1].pdgId(), gps_mother[1].status(), gps_mother[1].pt(), gps_mother[1].eta(), gps_mother[1].phi()
       
       # TAU
+      taus_assoc = [ ]
       for gentau in gps_tau:
           
           while gentau.status()!=2 :
@@ -321,57 +318,70 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
           genfinDaughters = finalDaughters(gentau, [])
           genptvis = p4sumvis(genfinDaughters).pt()
           
-          # check mother
-          taumoth = gentau
-          from_lq = False
-          while abs(taumoth.pdgId()) not in [2212] :
-              taumoth = taumoth.mother(0)
-              if abs(taumoth.pdgId()) in [42, 9000006]:
-                from_lq = True
-                break
-              elif taumoth.pdgId()==2212:
-                break
-          if not from_lq:
-              tree_assoc.pt[0]     = gentau.pt()
-              tree_assoc.ptvis[0]  = genptvis
-              tree_assoc.eta[0]    = gentau.eta()
-              tree_assoc.phi[0]    = gentau.phi()
-              tree_assoc.pid[0]  = gentau.pdgId()
-              tree_assoc.weight[0] = weight
-              tree_assoc.Fill()
+          # CHECK MOTHER
+          taumoth  = gentau.mother(0)
+          mothpid  = abs(taumoth.pdgId())
+          from_LQ  = False
+          #from_had = False # from hadron decay
+          #print '-'*30
+          while mothpid!=2212:
+            #print taumoth.pdgId()
+            if mothpid in lqids:
+              from_LQ = True
+              break
+            elif 100<mothpid<10000 and mothpid!=2212:
+              #from_had = True
+              break
+            taumoth = taumoth.mother(0)
+            mothpid = abs(taumoth.pdgId())
+          
+          # ASSOC
+          if not from_LQ:
+            tree_assoc.pt[0]     = gentau.pt()
+            tree_assoc.ptvis[0]  = genptvis
+            tree_assoc.eta[0]    = gentau.eta()
+            tree_assoc.phi[0]    = gentau.phi()
+            tree_assoc.pid[0]    = gentau.pdgId()
+            tree_assoc.moth[0]   = mothpid
+            tree_assoc.weight[0] = weight
+            tree_assoc.Fill()
+            #if not from_had:
+            taus_assoc.append(gentau)
       
       # B QUARK
       for genb in gps_b:
-          bmoth   = genb
-          from_lq = False
-          while abs(bmoth.pdgId())!=2212:
-              bmoth = bmoth.mother(0)
-              if abs(bmoth.pdgId()) in [42, 9000006]:
-                from_lq = True
-                break
-              if abs(bmoth.pdgId())==2212:
-                break
-          if not from_lq:
-              tree_assoc.pt[0]     = genb.pt()
-              tree_assoc.ptvis[0]  = -1
-              tree_assoc.eta[0]    = genb.eta()
-              tree_assoc.phi[0]    = genb.phi()
-              tree_assoc.pid[0]    = genb.pdgId()
-              tree_assoc.weight[0] = weight
-              tree_assoc.Fill()
+          bmoth   = genb.mother(0)
+          mothpid = abs(bmoth.pdgId())
+          from_LQ = False
+          while mothpid!=2212:
+            if mothpid in lqids:
+              from_LQ = True
+              break
+            bmoth   = bmoth.mother(0)
+            mothpid = abs(bmoth.pdgId())
+          if not from_LQ:
+            tree_assoc.pt[0]     = genb.pt()
+            tree_assoc.ptvis[0]  = -1
+            tree_assoc.eta[0]    = genb.eta()
+            tree_assoc.phi[0]    = genb.phi()
+            tree_assoc.pid[0]    = genb.pdgId()
+            tree_assoc.moth[0]   = mothpid
+            tree_assoc.weight[0] = weight
+            tree_assoc.Fill()
       
-      # MOTHER
+      # MOTHER LQ
       #print '-'*80
+      taus_decay = [ ]
+      bgen_decay = [ ]
       for moth in gps_mother:       
           
-          nother  = 0
           dau_pid = 0
           pair    = [ ]
           
           if moth.numberOfDaughters()==2:
             if moth.daughter(0).pdgId()==21 or moth.daughter(1).pdgId()==21:
               continue
-            if abs(moth.daughter(0).pdgId())==9000006:
+            if abs(moth.daughter(0).pdgId()) in lqids:
               continue
           
           for i in range(moth.numberOfDaughters()):
@@ -383,14 +393,16 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
               if abs(dau.pdgId())==15:
                 while dau.status()!=2:
                   dau = dau.daughter(0)
-                if dau.numberOfDaughters()==2:
-                  if abs(dau.daughter(0).pdgId())==15 and dau.daughter(1).pdgId()==22:
+                if dau.numberOfDaughters()==2 and abs(dau.daughter(0).pdgId())==15 and dau.daughter(1).pdgId()==22:
                     #print "This is brems !?!"
                     isBrem = True
+                else:
+                  taus_decay.append(dau)
               
               # BOTTOM QUARK
               elif abs(dau.pdgId())==5:
                 dau_pid = dau.pdgId()
+                bgen_decay.append(dau)
               
               # TOP QUARK
               elif abs(dau.pdgId())==6:
@@ -410,8 +422,8 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
               tree_decay.isBrem[0]      = isBrem
               
               if abs(dau.pdgId())==15:
-                finDaughters = finalDaughters(dau, [ ])
-                ptvis = p4sumvis(finDaughters).pt()
+                finDaughters        = finalDaughters(dau, [ ])
+                ptvis               = p4sumvis(finDaughters).pt()
                 tree_decay.ptvis[0] = ptvis
                 decaymode           = tauDecayMode(dau)
                 tree_decay.type[0]  = decaydict[decaymode]
@@ -424,7 +436,7 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
               tree_decay.weight[0]  = weight
               tree_decay.Fill()
               
-              if abs(moth.pdgId()) in [42, 9000006]:
+              if abs(moth.pdgId()) in lqids:
                 hist_LQ_decay.Fill(dau.pdgId())
           
           if len(pair)==2:
@@ -447,6 +459,19 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
           tree_mother.dau[0]       = dau_pid # save PDG ID for quark daughter
           tree_mother.weight[0]    = weight
           tree_mother.Fill()
+      
+      st = 0
+      taus_assoc.sort(key=lambda p: p.pt(), reverse=True)
+      taus_decay.sort(key=lambda p: p.pt(), reverse=True)
+      bgen_decay.sort(key=lambda p: p.pt(), reverse=True)
+      for part in taus_assoc[1:]+taus_decay[2:]+bgen_decay[2:]:
+        st += part.pt()
+      tree_event.ntau_assoc[0]  = len(taus_assoc)
+      tree_event.ntau_decay[0]  = len(taus_decay)
+      tree_event.nbgen_decay[0] = len(bgen_decay)
+      tree_event.st[0]          = st
+      tree_event.st_met[0]      = st + met[0].pt()
+      tree_event.Fill()
   
   print ">>>   processed %4s events in %s"%(evtid,formatTime(time.time()-start_proc))
   print ">>>   writing to output file %s..."%(outfilename)
