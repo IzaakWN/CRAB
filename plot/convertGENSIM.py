@@ -103,10 +103,13 @@ def main():
     isPythia  = 'Pythia' in infiles[0]
     convertGENSIM(infiles,outfile,Nmax=Nmax,isPythia=isPythia)
     print ">>> "
+  
+  print ">>>   done in in %s"%(formatTime(time.time()-start))
 
 
 def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   """Loop over GENSIM events and save custom trees."""
+  start1 = time.time()
   
   lqids = [46] if isPythia else [9000002,9000006]
   
@@ -147,6 +150,10 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   tree_event.addBranch('lq2_mass',    'f')
   tree_event.addBranch('lq1_pt',      'f')
   tree_event.addBranch('lq2_pt',      'f')
+  tree_event.addBranch('tau1_pt',     'f')
+  tree_event.addBranch('tau1_eta',    'f')
+  tree_event.addBranch('tau2_pt',     'f')
+  tree_event.addBranch('tau2_eta',    'f')
   tree_event.addBranch('st',          'f') # scalar sum pT
   tree_event.addBranch('st_met',      'f') # scalar sum pT with MET
   tree_event.addBranch('weight',      'f')
@@ -195,7 +202,7 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   tree_jet.addBranch('phi',           'f')
   tree_jet.addBranch('weight',        'f')
   
-  hist_LQ_decay = TH1F("LQ_decay","LQ decay",60,-30,30)
+  hist_LQ_decay = TH1F('LQ_decay',"LQ decay",60,-30,30)
   handle_gps,    label_gps    = Handle('std::vector<reco::GenParticle>'), 'genParticles'
   handle_jets,   label_jets   = Handle('std::vector<reco::GenJet>'), 'ak4GenJets'
   handle_met,    label_met    = Handle('vector<reco::GenMET>'), 'genMetTrue'
@@ -238,6 +245,7 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
       gps_tgen   = [p for p in gps_final if abs(p.pdgId())==6] #[-1:]
       gps_nugen  = [p for p in gps_final if abs(p.pdgId())==16]
       gps_tau    = [p for p in gps_final if abs(p.pdgId())==15 and p.status()==2]
+      gps_tau.sort(key=lambda p: p.pt(), reverse=True)
       gps_taucut = [p for p in gps_tau   if p.pt()>20 and abs(p.eta())<2.5]
       
       #print '-'*10
@@ -315,9 +323,9 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
           tree_event.mjj[0]     = -1
       
       # SCALAR SUM PT
-      if len(gps_taucut)>=2 or len(gps_bcut)>=1:
+      if len(gps_taucut)>=2 and len(gps_bcut)>=1:
         st = 0
-        gps_taucut.sort(key=lambda p: p.pt(), reverse=True)
+        #gps_taucut.sort(key=lambda p: p.pt(), reverse=True)
         gps_bcut.sort(key=lambda p: p.pt(), reverse=True)
         #taus_assoc.sort(key=lambda p: p.pt(), reverse=True)
         #taus_decay.sort(key=lambda p: p.pt(), reverse=True)
@@ -328,6 +336,10 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
       else:
         st    = -1
         stmet = -1
+      tree_event.tau1_pt[0]   = gps_tau[0].pt()
+      tree_event.tau1_eta[0]  = gps_tau[0].eta()
+      tree_event.tau2_pt[0]   = gps_tau[1].pt()
+      tree_event.tau2_eta[0]  = gps_tau[1].eta()
       tree_event.st[0]        = st
       tree_event.st_met[0]    = stmet
       tree_mother.st[0]       = st
@@ -503,14 +515,14 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
       
       if len(gps_mother)==1:
         tree_event.lq1_mass[0]  = gps_mother[0].mass()
-        tree_event.lq1_pt[0]    = gps_mother[0].mass()
+        tree_event.lq1_pt[0]    = gps_mother[0].pt()
         tree_event.lq2_mass[0]  = -1
         tree_event.lq2_pt[0]    = -1
       elif len(gps_mother)>=2:
         tree_event.lq1_mass[0]  = gps_mother[0].mass()
-        tree_event.lq1_pt[0]    = gps_mother[0].mass()
+        tree_event.lq1_pt[0]    = gps_mother[0].pt()
         tree_event.lq2_mass[0]  = gps_mother[1].mass()
-        tree_event.lq2_pt[0]    = gps_mother[1].mass()
+        tree_event.lq2_pt[0]    = gps_mother[1].pt()
       else:
         tree_event.lq1_mass[0]  = -1
         tree_event.lq1_pt[0]    = -1
@@ -525,7 +537,7 @@ def convertGENSIM(infiles,outfilename,Nmax=-1,isPythia=False):
   print ">>>   writing to output file %s..."%(outfilename)
   outfile.Write()
   outfile.Close()
-  print ">>>   done in in %s"%(formatTime(time.time()-start))
+  print ">>>   done in in %s"%(formatTime(time.time()-start1))
   
 
 root_dtype = {
