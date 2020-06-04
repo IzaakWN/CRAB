@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Author: Izaak Neutelings (November, 2019)
+# Author: Izaak Neutelings (November 2019)
 # Source:
 #   git clone git@github.com:cms-sw/genproductions.git genproductions
 #   cd genproductions/bin/MadGraph5_aMCatNLO/
