@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 # Author: Izaak Neutelings (June 2020)
+# git clone git@github.com:IzaakWN/genproductions.git genproductions
 import os, sys
-from utils import bold, warning, ensureDirectory
 #print sys.path
-basedir = "GenerateMC/genproductions/bin/MadGraph5_aMCatNLO"
+#basedir = "/eos/user/i/ineuteli//production/LQ_Request2020/genproductions/bin/MadGraph5_aMCatNLO"
+basedir = "genproductions/bin/MadGraph5_aMCatNLO"
 carddir = "cards/production/2017/13TeV/ScalarLQ/"
 
 
@@ -22,15 +23,13 @@ def submit(sample,carddir,scram,cmssw):
   
 
 def submitArgFile(jobname,argfile):
-  """Submit argument file to HTCondor."""
   logfile = "log/%s.$(ClusterId).$(ProcId).log"%(jobname)
   command = "condor_submit -batch-name %s -append mylogfile='%s' submit_gridpack_HTCondor.sub -queue arg from %s"%(jobname,logfile,argfile)
-  print ">>> "+warning(command)
+  print ">>> %s"%(command)
   os.system(command)
   
 
 def createArgFile(jobname,proc,masses,lambdas,scram,cmssw):
-  """Create argument file for HTCondor."""
   fname = "args_%s.txt"%(jobname)
   print ">>> %s"%(jobname)
   with open(fname,'w+') as file:
@@ -43,9 +42,9 @@ def createArgFile(jobname,proc,masses,lambdas,scram,cmssw):
         fulldir = os.path.join(basedir,samdir)
         workdir = os.path.join(basedir,sample)
         if not os.path.exists(fulldir):
-          print ">>> "+warning("Sample card directory does not exist! %r"%(fulldir))
+          print ">>> Sample card directory does not exist! %r"%(fulldir)
         if os.path.exists(workdir):
-          print ">>> "+warning("Work directory already exists! Please remove %r"%(workdir))
+          print ">>> Work directory already exists! Please remove %r"%(workdir)
         args = "%s %s %s %s"%(sample,samdir,scram,cmssw)
         print ">>>   %s"%(args)
         file.write(args+'\n')
@@ -66,9 +65,8 @@ def main():
   }
   fulldir = os.path.join(basedir,carddir)
   if not os.path.exists(fulldir):
-    print ">>> "+warning("Card directory does not exist! %r"%(fulldir))
+    print ">>> Card directory does not exist! %r"%(fulldir)
   #os.chdir(basedir)
-  ensureDirectory("log")
   
   for year in years:
     scram, cmssw = arch_dict[year]
