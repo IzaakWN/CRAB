@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 from utils import ensureDirectory
 
 usage = """Submit SGE jobs to generate GENSIM samples."""
-parser = ArgumentParser(prog='submit_sge',description=usage,epilog="Succes!")
+parser = ArgumentParser(prog='submit_GENSIM_sge',description=usage,epilog="Succes!")
 parser.add_argument('pset',             type=str, nargs='?', action='store', default="pset_GENSIM.py",
                     metavar='FILE',     help="parameter-set configuration file to submit" )
 parser.add_argument('-m', '--mock-sub', dest="submit", default=True, action='store_false',
@@ -109,7 +109,7 @@ def submitSampleToSGE(pset,gridpack,sample,index=-1,N=-1,ncores=ncores,tag=tag):
       qoptions = "%s -pe smp %d"%(qoptions,ncores)
       options  = "%s -c %s"%(options,ncores)
     options = options.lstrip(' ')
-    command = "qsub %s submit_sge.sh %s %s %s %s"%(qoptions.strip(),pset,gridpack,sample,options.strip())
+    command = "qsub %s submit_GENSIM_sge.sh %s %s %s %s"%(qoptions.strip(),pset,gridpack,sample,options.strip())
     print ">>> %s"%(command.replace(jobname,"\033[;1m%s\033[0;0m"%jobname,1))
     nJobs  += 1
     if not args.submit:
