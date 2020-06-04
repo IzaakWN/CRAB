@@ -1,5 +1,5 @@
 #! /usr/bin/env cmsRun
-# Author: Izaak Neutelings (November, 2019)
+# Author: Izaak Neutelings (November 2019)
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: Configuration/GenProduction/python/EXO-RunIIFall18wmLHEGS-00790-fragment.py --fileout file:EXO-RunIIFall18wmLHEGS-00790.root --mc --eventcontent RAWSIM,LHE --datatier GEN-SIM,LHE --conditions 102X_upgrade2018_realistic_v11 --beamspot Realistic25ns13TeVEarly2018Collision --step LHE,GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2018 --python_filename EXO-RunIIFall18wmLHEGS-00790_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring --customise_commands process.RandomNumberGeneratorService.externalLHEProducer.initialSeed=int() -n 732
 print ">>> %s start pset_GENSIM.py %s"%('-'*15,'-'*15)

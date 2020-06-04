@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Author: Izaak Neutelings (November, 2019)
+# Author: Izaak Neutelings (November 2019)
 # grep -l Aborting submit_sge/Scalar*
 # for d in $SAMPLES/Scalar*M1*GENSIM; do
 #   I=""; for i in `seq 1 4`; do [ ! -e $d/GENSIM_$i.root ] && I+="$i "; done;

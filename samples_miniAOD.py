@@ -1,4 +1,4 @@
-# Author: Izaak Neutelings (October, 2019)
+# Author: Izaak Neutelings (October 2019)
 # dasgoclient --limit=0 --query="dataset=/PairVectorLQ_InclusiveDecay_M-1100_TuneCP2_13TeV-madgraph-pythia8/*/MINIAODSIM"
 
 samples = { }

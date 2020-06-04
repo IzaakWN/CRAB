@@ -1,4 +1,4 @@
-# Author: Izaak Neutelings (October, 2019)
+# Author: Izaak Neutelings (October 2019)
 # dasgoclient --limit=0 --query="dataset=/*/ineuteli*/USER instance=prod/phys03"
 
 samples = { }

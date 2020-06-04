@@ -1,4 +1,4 @@
-# Author: Izaak Neutelings (October, 2019)
+# Author: Izaak Neutelings (October 2019)
 # Source:
 #  https://docs.google.com/presentation/d/1YTANRT_ZeL5VubnFq7lNGHKsiD7D3sDiOPNgXUYVI0I/edit#slide=id.g61f8771f52_33_8
 

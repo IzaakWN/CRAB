@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Author: Izaak Neutelings (October, 2019)
+# Author: Izaak Neutelings (October 2019)
 # Usage:
 #   ...
 from CRABClient.UserUtilities import getUsernameFromSiteDB

@@ -1,5 +1,5 @@
 #! /usr/bin/env cmsRun
-# Author: Yuta Takahashi & Izaak Neutelings (October, 2019)
+# Author: Yuta Takahashi & Izaak Neutelings (October 2019)
 # Produce pat::Tau collection with the new DNN Tau-Ids from miniAOD 12Apr2018_94X_mc2017
 # dasgoclient --limit=0 --query="dataset=/DYJetsToLL_M-50_TuneC*_13TeV-madgraphMLM-pythia8/*NanoAODv5*/NANOAOD*"
 print ">>> %s start pset_miniAOD_rerun.py %s"%('-'*15,'-'*15)

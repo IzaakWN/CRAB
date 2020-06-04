@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Author: Izaak Neutelings (November, 2019)
+# Author: Izaak Neutelings (November 2019)
 # Usage:
 #  ./create_cards.py cards/LQ_template_*.dat -n '$MASS_L$LAMBDA_NNPDF31_LO' -m 1000 -p LAMBDA=0.1,1.0,1.5:PDF=315200
 # Source:

@@ -1,5 +1,5 @@
 #! /usr/bin/env cmsRun
-# Author: Yuta Takahashi & Izaak Neutelings (October, 2019)
+# Author: Yuta Takahashi & Izaak Neutelings (October 2019)
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options:
 #  step1 --filein dbs:/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM --fileout file:SUS-RunIISummer16NanoAODv5-00085.root --mc --eventcontent NANOEDMAODSIM --datatier NANOAODSIM --conditions 102X_mcRun2_asymptotic_v7 --step NANO --nThreads 2 --era Run2_2016,run2_nanoAOD_94X2016 --python_filename SUS-RunIISummer16NanoAODv5-00085_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 100

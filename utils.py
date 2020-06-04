@@ -1,4 +1,4 @@
-# Author: Izaak Neutelings (October, 2019)
+# Author: Izaak Neutelings (October 2019)
 import os
 from fnmatch import fnmatch
 #if os.getenv('CMSSW_BASE'):
