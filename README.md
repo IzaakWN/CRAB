@@ -36,6 +36,7 @@ cmsenv
 scram b -j4
 cd ../..
 ```
+You can find a list of supported `CMSSW` versions and architectures on [this page](https://cmssdt.cern.ch/SDT/cgi-bin/ReleasesXML?anytype=1).
 When you want to use CRAB, you need to source the relevant setup script:
 ```
 source $VO_CMS_SW_DIR/crab3/crab_slc6.sh  # for SLC6
