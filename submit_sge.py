@@ -66,6 +66,7 @@ def main():
     
     # SUBMIT GRIDPACKS
     for gridpack in gridpacks:
+      assert os.path.isfile(gridpack), "Gridpack '%s' is not a file!"%(gridpack)
       jobname = getSampleNameFromGridpack(gridpack)
       for index in indices:
         submitSampleToSGE(pset,gridpack,jobname,index,N=nevents,tag=tag)

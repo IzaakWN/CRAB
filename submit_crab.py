@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 # Author: Izaak Neutelings (October, 2019)
+# Usage:
+#   ...
 from CRABClient.UserUtilities import getUsernameFromSiteDB
 from CRABClient.UserUtilities import config as crabconfig
 from CRABAPI.RawCommand import crabCommand
@@ -12,15 +14,15 @@ import re
 
 def main(args):
   
-  years    = args.years
-  pset     = args.pset
-  samples  = args.samples
-  vetoes   = args.vetoes
-  priority = args.priority
-  force    = args.force
-  test     = args.test
-  tag      = "DeepTau2017v2p1"
-  
+  years     = args.years
+  pset      = args.pset
+  samples   = args.samples
+  vetoes    = args.vetoes
+  priority  = args.priority
+  force     = args.force
+  test      = args.test
+  splitting = 'EventAwareLumiBased'
+  tag       = "" #"DeepTau2017v2p1"
   
   # SAMPLES
   if 'nanoaod' in pset.lower():
@@ -29,6 +31,11 @@ def main(args):
   else:
     import samples_miniAOD
     samplesets = samples_miniAOD.samples
+  
+  # WARNING
+  if len(years)>=2:
+    print bold(">>> Warning! More than one year was given. If you load the CMSSW configuration of different years,")
+    print bold(">>>          You might get an error that CMSSW configuration files cannot be loaded more than once in memory...")
   
   # SUBMIT
   for year in years:
@@ -39,7 +46,7 @@ def main(args):
     if vetoes:
       datasets = filterSamplesWithPattern(datasets,vetoes,veto=True)
     submitSampleToCRAB(pset,year,datasets,tag=tag,priority=priority,
-                       test=test,force=force)
+                       test=test,force=force,split=splitting)
   
 
 
@@ -56,14 +63,16 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   version       = re.findall("(?<=AOD)v\d+",pset)
   version       = version[0] if version else ""
   pluginName    = 'Analysis' #'PrivateMC'
-  splitting     = kwargs.get('split',      'FileBased' if year==2018 or datatier=='nanoAOD' else 'Automatic')
+  splitting     = kwargs.get('split',      'FileBased') #if year==2018 or datatier=='nanoAOD' else 'Automatic')
   tag           = kwargs.get('tag',        "")
   instance      = kwargs.get('instance',   'global')
   nevents       = -1
   unitsPerJob   = 1 # files per job for 'FileBased'
+  eventsPerJob  = kwargs.get('eventsPerJob', 10000) # unitsPerJob for 'EventAwareLumiBased' splitting
   njobs         = -1
   ncores        = kwargs.get('ncores',     1) # make sure nCores > nThreads in pset.py
   maxRunTime    = kwargs.get('maxRunTime', 6*60) #1250 # minutes
+  maxMemory     = kwargs.get('maxMemory',  3000) # MB
   priority      = kwargs.get('priority',   10)
   workArea      = "crab_tasks" #"crab_projects"
   outdir        = '/store/user/%s/%s_%s%s'%(getUsernameFromSiteDB(),datatier,year,formatTag(tag))
@@ -77,28 +86,36 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
     njobs        = int(test)
     outdir      += '_test'
     publish      = False
+    samples      = samples[:1]
+    if nevents<0:
+      nevents    = 2500
   if splitting=='Automatic':
     unitsPerJob  = -1
     njobs        = -1
     maxRunTime   = -1
+  if splitting=='EventAwareLumiBased':
+    unitsPerJob  = eventsPerJob
+    njobs        = -1
   
   # PRINT
   print ">>> "+'='*70
-  print ">>> year        = %s"%year
-  print ">>> pset        = '%s'"%bold(pset)
-  print ">>> pluginName  = '%s'"%pluginName
-  print ">>> splitting   = '%s'"%splitting
-  print ">>> tag         = '%s'"%bold(tag)
-  print ">>> nevents     = %s"%nevents
-  print ">>> unitsPerJob = %s"%unitsPerJob
-  print ">>> njobs       = %s"%njobs
-  print ">>> nCores      = %s"%ncores
-  print ">>> maxRunTime  = %s"%maxRunTime
-  print ">>> priority    = %s"%priority
-  print ">>> workArea    = '%s'"%workArea
-  print ">>> site        = '%s'"%site
-  print ">>> outdir      = '%s'"%outdir
-  print ">>> publish     = %r"%publish
+  print ">>> year         = %s"%year
+  print ">>> pset         = '%s'"%bold(pset)
+  print ">>> pluginName   = '%s'"%pluginName
+  print ">>> splitting    = '%s'"%splitting
+  print ">>> unitsPerJob  = %s"%unitsPerJob
+  print ">>> nevents      = %s"%nevents
+  print ">>> tag          = '%s'"%bold(tag)
+  print ">>> njobs        = %s"%njobs
+  print ">>> nCores       = %s"%ncores
+  print ">>> maxRunTime   = %s"%maxRunTime
+  print ">>> maxMemory    = %s"%maxMemory
+  print ">>> priority     = %s"%priority
+  print ">>> workArea     = '%s'"%workArea
+  print ">>> site         = '%s'"%site
+  print ">>> outdir       = '%s'"%outdir
+  print ">>> publish      = %r"%publish
+  print ">>> test         = %r"%test
   print ">>> "+'='*70
   
   if len(samples)==0:
@@ -118,6 +135,8 @@ def submitSampleToCRAB(pset,year,samples,**kwargs):
   config.JobType.numCores           = ncores
   if maxRunTime>0:
     config.JobType.maxJobRuntimeMin = maxRunTime # minutes
+  if maxMemory>0:
+    config.JobType.maxMemoryMB      = maxMemory # MB
   config.JobType.priority           = priority
   
   config.Data.splitting             = splitting
@@ -283,7 +302,10 @@ def createDatasetOutTag(dataset,tag='',datatier=None,year=None,version=""):
     if 'miniaod' in outtag.lower():
       newtier = 'NanoAOD'+version
       outtag  = minipattern.sub(newtier,outtag)
-    globaltag = globaltags[dtype]['nanoAOD'].get(year,False)
+    else:
+      newtier = 'NanoAODv6'
+      print "ASSUMING '%s'"%newtier
+    globaltag = globaltags[dtype][newtier].get(year,False)
     if globaltag:
       outtag = outtag[:outtag.index(newtier)+len(newtier)]+'_'+globaltag
   if tag and not outtag.endswith(tag):
