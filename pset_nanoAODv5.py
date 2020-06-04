@@ -59,8 +59,8 @@ dtype     = options.dtype
 nThreads  = options.nThreads
 maxEvents = options.events
 sample    = options.sample
-globaltag = globaltags[dtype]['nanoAOD'].get(year,'auto:phase1_2017_realistic')
-era = eras['nanoAOD'].get(year,None)
+globaltag = globaltags[dtype]['NanoAODv5'].get(year,'auto:phase1_2017_realistic')
+era = eras['NanoAODv5'].get(year,None)
 if index>0:
   outfile = "file:nanoAOD_%s%s_%s.root"%(year,formatTag(sample),index)
 else:
