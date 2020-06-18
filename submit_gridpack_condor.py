@@ -1,6 +1,13 @@
 #! /usr/bin/env python
 # Author: Izaak Neutelings (June 2020)
-# git clone git@github.com:IzaakWN/genproductions.git genproductions
+# Note:
+#  - Clone cards:
+#      git clone git@github.com:IzaakWN/genproductions.git genproductions
+#  - Gridpack working area's can get large, O(400MB)
+#  - AFS has a limited space (up to 10 GB), use
+#      fs listquota
+#  - HTCondor jobs cannot be submitted from EOS
+#  - git push does not work on EOS
 import os, sys
 #print sys.path
 #basedir = "/eos/user/i/ineuteli//production/LQ_Request2020/genproductions/bin/MadGraph5_aMCatNLO"
@@ -29,35 +36,41 @@ def submitArgFile(jobname,argfile):
   os.system(command)
   
 
-def createArgFile(jobname,proc,masses,lambdas,scram,cmssw):
+def createArgFile(jobname,proc,masses,lambd,scram,cmssw):
   fname = "args_%s.txt"%(jobname)
   print ">>> %s"%(jobname)
   with open(fname,'w+') as file:
     for mass in masses:
-      for lambd in lambdas:
-        #print ">>> mass=%s, lambda=%s"%(mass,lambd)
-        lambd   = str(lambd).replace('.','p')
-        sample  = "%sScalarLQToBTau_M%s_L%s"%(proc,mass,lambd)
-        samdir  = os.path.join(carddir,sample)
-        fulldir = os.path.join(basedir,samdir)
-        workdir = os.path.join(basedir,sample)
-        if not os.path.exists(fulldir):
-          print ">>> Sample card directory does not exist! %r"%(fulldir)
-        if os.path.exists(workdir):
-          print ">>> Work directory already exists! Please remove %r"%(workdir)
-        args = "%s %s %s %s"%(sample,samdir,scram,cmssw)
-        print ">>>   %s"%(args)
-        file.write(args+'\n')
+      #for lambd in lambdas:
+      #print ">>> mass=%s, lambda=%s"%(mass,lambd)
+      #lambd   = str(lambd).replace('.','p')
+      sample  = "%sScalarLQToBTau_M%s_L%s"%(proc,mass,lambd)
+      samdir  = os.path.join(carddir,sample)
+      fulldir = os.path.join(basedir,samdir)
+      workdir = os.path.join(basedir,sample)
+      if not os.path.exists(fulldir):
+        print ">>> Sample card directory does not exist! %r"%(fulldir)
+      if os.path.exists(workdir):
+        print ">>> Work directory already exists! Please remove %r"%(workdir)
+      args = "%s %s %s %s"%(sample,samdir,scram,cmssw)
+      print ">>>   %s"%(args)
+      file.write(args+'\n')
   return fname
   
 
-def main():
+def main(args):
   #findHTCondorBindings()
   
-  years   = [2018] #[2016,2017,2018]
+  years   = [2017,] #2018] #[2016,2017,2018]
   procs   = ['Single',] #'Pair']
-  masses  = [500,800,1100,1400,1700,2000,2300]
+  masses  = [600,800,1000,1200,1400,1700,2000] #500,800,1100,1400,1700,2000,2300]
   lambdas = [1.5,2.0,2.5]
+  if args.masses:
+    masses = args.masses
+  if args.lambdas:
+    lambdas = args.lambdas
+  if args.year:
+    years = [args.year]
   arch_dict = {
     2016: ('slc6_amd64_gcc481','CMSSW_7_1_45_patch3'),
     2017: ('slc6_amd64_gcc630','CMSSW_9_3_17'),
@@ -71,10 +84,12 @@ def main():
   for year in years:
     scram, cmssw = arch_dict[year]
     for proc in procs:
-      jobname = "%sScalarLQToBTau_%s"%(proc,year)
-      argfile = createArgFile(jobname,proc,masses,lambdas,scram,cmssw)
-      submitArgFile(jobname,argfile)
-      print
+      for lambd in lambdas:
+        lambd   = str(lambd).replace('.','p')
+        jobname = "%sScalarLQToBTau_L%s_%s"%(proc,lambd,year)
+        argfile = createArgFile(jobname,proc,masses,lambd,scram,cmssw)
+        submitArgFile(jobname,argfile)
+        print
       #for mass in masses:
       #  for lambd in lambdas:
       #    print ">>> mass=%s, lambda=%s"%(mass,lambd)
@@ -90,7 +105,18 @@ def main():
 
 if __name__=='__main__':
   print
-  main()
+  from argparse import ArgumentParser
+  parser = ArgumentParser()
+  parser.add_argument('-m', '--mass',      dest='masses', nargs='+', type=int, default=None, action='store',
+                                           help="select masses" )
+  parser.add_argument('-L', '--lambda',    dest='lambdas', nargs='+', type=float, default=None, action='store',
+                                           help="select lambdas" )
+  parser.add_argument('-y', '--year',      dest='year', choices=[2016,2017,2018], type=int, default=2017, action='store',
+                                           help="select year" )
+  parser.add_argument('-v', '--verbose',   dest='verbose', default=False, action='store_true',
+                                           help="set verbose" )
+  args = parser.parse_args()
+  main(args)
   print ">>> Done."
   print
 

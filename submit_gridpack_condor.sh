@@ -38,9 +38,9 @@ peval "./gridpack_generation.sh $JOBNAME $CARDDIR local ALL $SCRAM_ARCH $CMSSW_V
 
 # FINISH
 peval "ls -hlt"
-peval "cp $GRIDPACK $OUTDIR"
+peval "mv $GRIDPACK $OUTDIR"
 peval "rm -rf $JOBNAME"
 peval "date"
 END=`date +%s`
 SECS=$((END-START))
-printf ">>> Done in %02d:%02d:%02d.\n" "$(( $SECS / 3600 ))" "$(( $SECS % 3600 /60 ))" "$(( $SECS % 60 ))"
+printf ">>> Done in %02d:%02d:%02d.\n" "$(($SECS/3600))" "$(($SECS%3600/60))" "$(($SECS%60))"
