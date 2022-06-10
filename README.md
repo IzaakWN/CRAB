@@ -12,6 +12,7 @@ Generate events or process `miniAOD` files with `CRAB3`.
 * [Event generation](#event-generation)<br>
   * [MadGraph gridpack generation](#madgraph-gridpack-generation)
   * [Local event generation](#local-event-generation)
+  * [Submit fragment to HTCondor](#Submit-fragment-to-HTCondor)
 * [Notes](#Notes)<br>
   * [CRAB3](#CRAB3)
   * [NanoAOD](#NanoAOD)
@@ -164,7 +165,6 @@ dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
 ```
 
 
-
 ## Event generation
 
 ### MadGraph gridpack generation
@@ -193,6 +193,17 @@ Produce events with a gridpack with [`pset_GENSIM.py`](pset_GENSIM.py) as e.g.
 cmsRun pset_GENSIM.py nevents=100 gridpack=ScalarLQ_Single_M500_slc6_amd64_gcc630_CMSSW_9_3_16_tarball.tar.xz
 ```
 
+### Submit fragment to HTCondor
+To submit a fragment and produce GENSIM events on HTCondor, do e.g.
+```
+mkdir -p test_DYJetsToMuTauh && cd test_DYJetsToMuTauh
+curl -s -k https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/TAU-RunIISummer20UL18wmLHEGEN-00006 > setup_DYJetsToMuTauh.sh
+sed -i 's/exit $GEN_ERR/echo "# IGNORE ERROR $GEN_ERR from request_fragment_check.py"/' setup_DYJetsToMuTauh.sh
+sed -i 's/EVENTS=[0-9]\+/EVENTS=500/' setup_DYJetsToMuTauh.sh
+bash setup_DYJetsToMuTauh.sh # setup CMSSW, fragment and generate GENSIM
+./submit_fragment.py -t _DYJetsToMuTauh test_DYJetsToMuTauh_buggy/TAU-RunIISummer20UL18wmLHEGEN-00006_1_cfg.py -N 100 -n 10000 -v2
+```
+Instructions to get the fragment are [below](#PSet-fragments).
 
 
 ## Notes
