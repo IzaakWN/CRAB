@@ -201,7 +201,7 @@ curl -s -k https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/TAU-Run
 sed -i 's/exit $GEN_ERR/echo "# IGNORE ERROR $GEN_ERR from request_fragment_check.py"/' setup_DYJetsToMuTauh.sh
 sed -i 's/EVENTS=[0-9]\+/EVENTS=500/' setup_DYJetsToMuTauh.sh
 bash setup_DYJetsToMuTauh.sh # setup CMSSW, fragment and generate GENSIM
-./submit_fragment.py -t _DYJetsToMuTauh test_DYJetsToMuTauh_buggy/TAU-RunIISummer20UL18wmLHEGEN-00006_1_cfg.py -N 100 -n 10000 -v2
+./submit_fragment.py -t _DYJetsToMuTauh test_DYJetsToMuTauh/TAU-RunIISummer20UL18wmLHEGEN-00006_1_cfg.py -N 100 -n 10000 -v2
 ```
 Instructions to get the fragment are [below](#PSet-fragments).
 
