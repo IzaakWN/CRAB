@@ -174,7 +174,7 @@ def writeline(file,line,verb=0):
 ###      os.environ['PYTHONPATH'] = value # to fix 'Could not find platform independent libraries' error
   
 
-def submit(fragment,njobs,nevts,outdir="",first=None,indices=None,logdir="",tag="",dry=False,verb=0):
+def submit(fragment,njobs,nevts,outdir="",first=None,indices=None,logdir="",tag="",dry=False,slc6=False,verb=0):
   """Submit fragment to HTCondor."""
   print(">>> Submitting...")
   indir    = os.path.dirname(fragment) or '.'
@@ -207,6 +207,8 @@ def submit(fragment,njobs,nevts,outdir="",first=None,indices=None,logdir="",tag=
   subcmd  = f"condor_submit submit_fragment.sub -a 'initialdir={indir}' -a 'mylogfile={log}'"
   subcmd += f" -a 'arguments={args}'" # -a 'should_transfer_files=no'
   subcmd += f" -batch-name {name} {queue}" #-queue '{queue}'
+  if slc6:
+    subcmd += f" -a 'requirements = (OpSysAndVer =?= \"SLCern6\")'"
   if verb>=4:
     subcmd += " -verbose"
   print(">>> "+subcmd)
@@ -222,6 +224,7 @@ def main(args):
   njobs     = args.njobs
   tag       = args.tag
   dry       = args.dry
+  #slc6      = args.slc6
   outdir    = args.outdir
   logdir    = "log/"
   verbosity = args.verbosity
@@ -267,6 +270,8 @@ if __name__ == '__main__':
                                           help="extra tag for output, default=%(default)s")
   parser.add_argument('-d', '--dry',      action='store_true',
                                           help="dry run: do not submit job to batch")
+  #parser.add_argument(      '--slc6',     action='store_true',
+  #                                        help="specify scl6")
   parser.add_argument('-v', '--verbose',  dest='verbosity', type=int, nargs='?', const=1, default=0,
                                           help="set verbosity, default=%(default)s" )
   args = parser.parse_args()

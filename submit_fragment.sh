@@ -37,6 +37,7 @@ peval "ls -hlt"
 div
 peval "source /cvmfs/cms.cern.ch/cmsset_default.sh"
 peval "export SCRAM_ARCH=slc7_amd64_gcc700"
+#peval "export SCRAM_ARCH=slc6_amd64_gcc700"
 peval "cd $CMSSWSRC"
 peval "cmsenv" #peval "eval `scramv1 runtime -sh`"
 peval "cd $WORKDIR"
