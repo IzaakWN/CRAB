@@ -2,6 +2,9 @@
 # Author: Izaak Neutelings (June 2022)
 function peval { echo -e ">>> $@"; eval "$@"; }
 function div { printf '#%.0s' $(seq 100); echo; }
+div
+START=`date +%s`
+echo "Job start at `date`"
 
 # USER OPTIONS
 OUTDIR="$1"
@@ -60,3 +63,8 @@ if [ "$OUTDIR" ]; then
   peval "eos cp GENSIM*.root $OUTDIR/"
 fi
 peval "rm -rf *.root" # clean and prevent CONDOR file transfer
+div
+END=`date +%s`; RUNTIME=$((END-START))
+echo "Job complete at `date`"
+printf "Took %d minutes %d seconds" "$(( $RUNTIME / 60 ))" "$(( $RUNTIME % 60 ))"
+div
