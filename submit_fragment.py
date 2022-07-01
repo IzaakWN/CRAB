@@ -181,7 +181,8 @@ def submit(fragment,njobs,nevts,outdir="",first=None,indices=None,logdir="",tag=
   fullfrag = os.path.abspath(fragment)
   ensuredir(os.path.join(indir,logdir)) # log directory
   ensuredir(outdir) # ensure output directory exists before submitting
-  args    = f"{outdir} {fullfrag} maxevts={nevts} index=$(ProcId) seed=$$([$(ProcId)+1])"
+  #args    = f"{outdir} {fullfrag} maxevts={nevts} index=$(ProcId) seed=$$([$(ProcId)+1])" # start from 0
+  args    = f"{outdir} {fullfrag} maxevts={nevts} index=$$([$(ProcId)+1]) seed=$$([$(ProcId)+1])" # start from 1
   if tag:
     args += f" tag={tag}"
   if indices:

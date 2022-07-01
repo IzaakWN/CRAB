@@ -19,6 +19,7 @@ def main(args):
   
   carddir    = args.carddir
   sample     = args.sample
+  cmsswdir   = args.cmsswdir or "/afs/cern.ch/user/i/ineuteli/prod/CRAB/CMSSW_10_6_19"
   years      = args.years
   cardlabel  = args.cardlabel
   masses     = args.masses
@@ -27,14 +28,13 @@ def main(args):
   copy       = args.copy
   remove     = not args.keep
   test       = args.test
-  cmsswdir   = "/work/ineuteli/production/LQ_Legacy/CMSSW_10_2_16_patch1" # TODO: automatic or user-set
   genproddir = "genproductions/bin/MadGraph5_aMCatNLO"
   workdir    = "%s/src/%s"%(cmsswdir,genproddir)
-  assert os.path.isdir(cmsswdir), error("CMSSW directory '%s' does not exists!"%(cmsswdir))
-  assert os.path.isdir(workdir), error("Working directory '%s' does not exists!"%(workdir))
   oldcarddir = carddir[:]
   
   # CHECK environment
+  assert os.path.isdir(cmsswdir), error("CMSSW directory '%s' does not exists!"%(cmsswdir))
+  assert os.path.isdir(workdir), error("Working directory '%s' does not exists!"%(workdir))
   assert not os.getenv('CMSSW_BASE'), error("A CMSSW environment is set. Please retry in a clean shell session.")
   assert os.getenv('CMS_PATH'), error("No CMS default environment set! Please do 'source $VO_CMS_SW_DIR/cmsset_default.sh' first.")
   
@@ -155,6 +155,8 @@ if __name__ == '__main__':
                        metavar='CARDDIR',  help="directoy with cards" )
   parser.add_argument('sample',            type=str, action='store',
                        metavar='SAMPLE',   help="name of sample" )
+  parser.add_argument('-C', '--cmssw',     dest='cmsswdir', type=str, action='store',
+                       metavar='DIR',      help="CMSSW directory with genproductions" )
   parser.add_argument('-k', '--keep',      action='store_true', default=False,
                                            help="do not remove the gridpack directory" )
   #parser.add_argument('-f', '--force',     action='store_true', default=False,

@@ -29,8 +29,8 @@ cd CRAB
 ```
 then install the relevant `CMSSW` in this directory, e.g.:
 ```
-CMSSW=CMSSW_10_2_16_patch1
-export SCRAM_ARCH=slc6_amd64_gcc700
+CMSSW=CMSSW_10_6_19
+export SCRAM_ARCH=slc7_amd64_gcc700
 cmsrel $CMSSW
 cd $CMSSW/src
 cmsenv
@@ -83,8 +83,8 @@ cd CRAB
 source setupVOMS.sh
 source $VO_CMS_SW_DIR/cmsset_default.sh
 source $VO_CMS_SW_DIR/crab3/crab_slc6.sh
-export SCRAM_ARCH=slc6_amd64_gcc700
-cd CMSSW_10_2_16_patch1/src
+export SCRAM_ARCH=slc7_amd64_gcc700
+cd CMSSW_10_6_19/src
 cmsenv
 cd ../..
 ```
@@ -170,9 +170,10 @@ dasgoclient --limit=0 --query="dataset=/*/<user>*/USER instance=prod/phys03"
 ### MadGraph gridpack generation
 Before you can generate MadGraph events with CMSSW, it's useful to create a gridpack, as described [here](https://twiki.cern.ch/twiki/bin/viewauth/CMS/QuickGuideMadGraph5aMCatNLO), or install
 ```
+cd $CMSSW_BASE/src/
 git clone git@github.com:cms-sw/genproductions.git genproductions
 ```
-and in a clean shell session, run
+and in a clean shell session (i.e., without an CMSSW environment sourced), run
 ```
 source $VO_CMS_SW_DIR/cmsset_default.sh
 cd genproductions/bin/MadGraph5_aMCatNLO/
@@ -184,7 +185,7 @@ To produce a large set of MadGraph cards with varying parameters (mass, coupling
 ```
 Produce the cards and gridpacks in series with [`generate_gridpacks.py`](generate_gridpacks.py), e.g.
 ```
-./generate_gridpacks.py cards/ScalarLQ_Single ScalarLQ_Single -m 1000 -p LAMBDA=0.1,1.0,1.5
+./generate_gridpacks.py cards/ScalarLQ_Single ScalarLQ_Single -m 1000 -p LAMBDA=0.1,1.0,1.5 -C CMSSW_10_6_19
 ```
 
 ### Local event generation
@@ -194,7 +195,7 @@ cmsRun pset_GENSIM.py nevents=100 gridpack=ScalarLQ_Single_M500_slc6_amd64_gcc63
 ```
 
 ### Submit fragment to HTCondor
-To submit a fragment and produce GENSIM events on HTCondor, do e.g.
+To submit a MCM fragment and produce GENSIM events on HTCondor for quick studies, do e.g.
 ```
 mkdir -p test_DYJetsToMuTauh && cd test_DYJetsToMuTauh
 curl -s -k https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/TAU-RunIISummer20UL18wmLHEGEN-00006 > setup_DYJetsToMuTauh.sh
