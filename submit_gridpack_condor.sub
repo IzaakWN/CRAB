@@ -1,13 +1,12 @@
 # Author: Izaak Neutelings (June 2020)
 # Description: HTCondor submission file with argument from a file
 universe              = vanilla
-executable            = submit_gridpack_HTCondor.sh
+executable            = submit_gridpack_condor.sh
 arguments             = $(arg)
 mylogfile             = log/job.$(ClusterId).$(ProcId).log
 log                   = $(mylogfile)
 output                = $(mylogfile)
 error                 = $(mylogfile)
 should_transfer_files = NO
-requirements          = (OpSysAndVer =?= "SLCern6")
 +JobFlavour           = longlunch
 #queue arg from args.txt

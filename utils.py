@@ -4,13 +4,13 @@ from fnmatch import fnmatch
 #if os.getenv('CMSSW_BASE'):
 #  import Utilities.General.cmssw_das_client as dasclient
 
-def ensureDirectory(dirname):
+def ensuredir(dirname):
   """Make directory if it does not exist."""
   if not os.path.exists(dirname):
     os.makedirs(dirname)
-    print '>>> made directory "%s"'%(dirname)
+    print('>>> made directory "%s"'%(dirname))
     if not os.path.exists(dirname):
-      print '>>> failed to make directory "%s"'%(dirname)
+      print('>>> failed to make directory "%s"'%(dirname))
   return dirname
   
 def green(string,**kwargs):
@@ -22,6 +22,19 @@ def bold(string,**kwargs):
 def error(string,**kwargs):
   return "\x1b[1;31;40m%s\033[0m"%string
   
+
+def subkey(string,**kwargs):
+  """Replace keys with '$'."""
+  for key, value in sorted(kwargs.items(),key=lambda x: -len(x[0])):
+    if '${'+key in string: # BASH variable expansions
+      matches = re.findall(r"\$\{%s:(\d*):(\d+)\}"%(key),string)
+      for a, b in matches:
+        substr = value[int(a or 0):int(b)]
+        string = re.sub(r"\$\{%s:%s:%s\}"%(key,a,b),substr,string)
+    string = string.replace('$'+key,str(value))
+  return string
+  
+
 def warning(string,**kwargs):
   """Print warning with color."""
   pre    = kwargs.get('pre',  "") + "\033[1m\033[93mWarning!\033[0m \033[93m"
@@ -37,7 +50,6 @@ def formatTag(tag):
     tag = '_'+tag
   return tag
   
-
 
 def matchSampleToPattern(sample,patterns):
   """Match sample name to some pattern, using glob wildcards '*' or '?'."""
@@ -61,7 +73,6 @@ def filterSamplesWithPattern(strings,patterns,veto=False):
     newlist = [s for s in strings if matchSampleToPattern(s,patterns)]
   return newlist
   
-
 
 def getSampleSites(dataset,instance=None):
   """Get the sites a given dataset (DAS path) is stored on."""

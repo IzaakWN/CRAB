@@ -10,9 +10,8 @@
 import os, re, glob, shutil
 import itertools
 import subprocess
-from utils import formatTag, bold, error, warning, ensureDirectory
-from create_cards import makeCardLabel, makeCardName, makeCard, getCards
-
+from utils import formatTag, bold, error, warning, ensuredir
+from create_cards import subplaceholders, getcardname, getcard, getcards
 
 
 def main(args):
@@ -86,9 +85,9 @@ def main(args):
       for key, value in zip(keys,values):
         kwargs[key] = value
       for template in templates:
-        cardname = makeCardName(template,cardlabel,**kwargs)
-        makeCard(template,cardname,**kwargs)
-      samplenames.append("%s_%s"%(sample,makeCardLabel(cardlabel,**kwargs)))
+        cardname = getcardname(template,cardlabel,**kwargs)
+        getcard(template,cardname,**kwargs)
+      samplenames.append("%s_%s"%(sample,subplaceholders(cardlabel,**kwargs)))
     carddir    = os.path.relpath(carddir,workdir)
     os.chdir(workdir)
     for samplename in samplenames:
@@ -102,13 +101,13 @@ def main(args):
 def generateGridpack(carddir, sample, **kwargs):
   """Create a CRAB configuration and submit a given list of samples."""
   
-  cards  = getCards(carddir,sample) #[os.path.basename(f) for f in glob.glob("%s/%s_*.dat"%(carddir,sample))]
+  cards  = getcards(carddir,sample) #[os.path.basename(f) for f in glob.glob("%s/%s_*.dat"%(carddir,sample))]
   copy   = kwargs.get('copy',   False )
   remove = kwargs.get('remove', True  )
   
   # COPY
   if copy:
-    newdir = ensureDirectory("%s_InputCards"%sample)
+    newdir = ensuredir("%s_InputCards"%sample)
     print ">>> copying cards to '%s'..."%newdir
     for card in cards:
       shutil.copy(os.path.join(carddir,card),newdir)

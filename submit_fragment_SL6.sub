@@ -1,0 +1,22 @@
+# Author: Izaak Neutelings (June 2022)
+# Submit as
+#   condor_submit submit_fragment.sub -a 'arguments=fragment.py -a 'mylogfile=log/myjob.$(ClusterId).$(ProcId).log' -queue 10
+universe              = vanilla
+executable            = submit_fragment.sh
+#arguments            = $(myargs)
+#initialdir           = $(outdir)
+mylogfile             = job.$(ClusterId).$(ProcId).log
+log                   = $(mylogfile)
+output                = $(mylogfile)
+error                 = $(mylogfile)
+should_transfer_files = no
+use_x509userproxy     = true
+getenv                = false
+environment           = JOBID=$(ClusterId);TASKID=$(ProcId)
++JobFlavour           = tomorrow
++MaxRuntime           = 60000
+#requirements          = (OpSysAndVer =?= "SLCern6")
+#requirements          = (OpSysAndVer =?= "CentOS7")
+#queue 10
+#queue arg from ( 1, 2, 3 )
+#queue arg from args.txt

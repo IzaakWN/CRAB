@@ -9,7 +9,7 @@ import os, sys
 import subprocess
 import time
 from argparse import ArgumentParser
-from utils import ensureDirectory
+from utils import ensuredir
 
 usage = """Submit SGE jobs to generate GENSIM samples."""
 parser = ArgumentParser(prog='submit_GENSIM_sge',description=usage,epilog="Succes!")
@@ -62,7 +62,7 @@ def main():
     INPUTDIR  = "gridpacks"
     REPORTDIR = "%s/submit_sge"%(WORKPATH)
     gpversion = "slc6_amd64_gcc630_CMSSW_9_3_16"
-    ensureDirectory(REPORTDIR)
+    ensuredir(REPORTDIR)
     
     # SUBMIT GRIDPACKS
     for gridpack in gridpacks:
